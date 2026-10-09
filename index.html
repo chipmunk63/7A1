@@ -1065,7 +1065,7 @@ function initFirebase() {
       if (d.tkbData) tkbData = d.tkbData;
       if (d.messages) messages = d.messages;
       if (d.activityLog) activityLog = d.activityLog;
-      if (d.seatingMap) seatingMap = d.seatingMap;
+      if (d.seatingMap != null) seatingMap = normalizeSeatingMap(d.seatingMap);
       cleanOldLogs();
       saveStorage(false);
       refreshAllViews();
@@ -1143,7 +1143,7 @@ function forceSyncWithCloud() {
     if (d.tkbData) tkbData = d.tkbData;
     if (d.messages) messages = d.messages;
     if (d.activityLog) activityLog = d.activityLog;
-    if (d.seatingMap) seatingMap = d.seatingMap;
+    if (d.seatingMap != null) seatingMap = normalizeSeatingMap(d.seatingMap);
     cleanOldLogs();
     saveStorage(false);
     refreshAllViews();
@@ -2195,28 +2195,61 @@ const GROUP_COLORS = {
   'Tổ 4': { bg: 'bg-pink-100', border: 'border-pink-400', text: 'text-pink-900', badge: 'bg-pink-500' }
 };
 
-function ensureSeatingMap() {
-  if (!seatingMap || !Array.isArray(seatingMap) || seatingMap.length !== SEAT_COUNT) {
-    seatingMap = buildDefaultSeating();
+/** Chuẩn hoá seatingMap: Firebase RTDB biến mảng có null thành object → phải convert lại */
+function normalizeSeatingMap(raw) {
+  const map = Array(SEAT_COUNT).fill('');
+  if (!raw) return map;
+  if (Array.isArray(raw)) {
+    for (let i = 0; i < SEAT_COUNT; i++) {
+      const v = raw[i];
+      map[i] = (v && typeof v === 'string') ? v : '';
+    }
+    return map;
   }
+  // Object dạng { "0": "HS101", "3": "HS102", ... } từ Firebase
+  if (typeof raw === 'object') {
+    Object.keys(raw).forEach(k => {
+      const i = parseInt(k, 10);
+      if (!isNaN(i) && i >= 0 && i < SEAT_COUNT) {
+        const v = raw[k];
+        map[i] = (v && typeof v === 'string') ? v : '';
+      }
+    });
+  }
+  return map;
+}
+
+function ensureSeatingMap() {
+  // Chỉ xếp mặc định khi chưa có dữ liệu hợp lệ (toàn trống hoặc null)
+  const normalized = normalizeSeatingMap(seatingMap);
+  const hasAny = normalized.some(id => id && id.length > 0);
+
+  if (!hasAny) {
+    seatingMap = buildDefaultSeating();
+  } else {
+    seatingMap = normalized;
+  }
+
+  // Loại ID không còn trong danh sách HS
   const validIds = new Set(students.map(s => s.id));
-  seatingMap = seatingMap.map(id => (id && validIds.has(id) ? id : null));
+  seatingMap = seatingMap.map(id => (id && validIds.has(id) ? id : ''));
+
+  // Gắn HS mới vào chỗ trống (không đụng chỗ đã xếp)
   const seated = new Set(seatingMap.filter(Boolean));
   const missing = students.filter(s => !seated.has(s.id));
   for (const st of missing) {
-    const emptyIdx = seatingMap.findIndex(id => id === null);
+    const emptyIdx = seatingMap.findIndex(id => !id);
     if (emptyIdx >= 0) seatingMap[emptyIdx] = st.id;
   }
 }
 
 function buildDefaultSeating() {
-  // Xếp lần lượt theo tổ vào 48 chỗ (6 hàng × 8 cột)
-  const map = Array(SEAT_COUNT).fill(null);
+  // Xếp lần lượt theo tổ vào 48 chỗ (6 hàng × 8 cột). Dùng '' thay null để Firebase không nuốt dữ liệu.
+  const map = Array(SEAT_COUNT).fill('');
   const ordered = [];
   ['Tổ 1', 'Tổ 2', 'Tổ 3', 'Tổ 4'].forEach(g => {
     students.filter(s => s.group === g).forEach(s => ordered.push(s.id));
   });
-  // HS không thuộc 4 tổ (nếu có)
   students.forEach(s => { if (!ordered.includes(s.id)) ordered.push(s.id); });
   ordered.forEach((id, i) => { if (i < SEAT_COUNT) map[i] = id; });
   return map;
@@ -2326,30 +2359,40 @@ function onSeatDragOver(e) {
 function onSeatDrop(e, targetIdx) {
   e.preventDefault();
   if (!(currentUser?.type === 'officer' && currentUser.officer.role === 'gvcn')) return;
-  const fromIdx = dragSeatIndex !== null ? dragSeatIndex : parseInt(e.dataTransfer.getData('text/plain'));
+  const fromIdx = dragSeatIndex !== null ? dragSeatIndex : parseInt(e.dataTransfer.getData('text/plain'), 10);
   if (isNaN(fromIdx) || fromIdx === targetIdx) return;
-  // Đổi chỗ
-  const tmp = seatingMap[fromIdx];
-  seatingMap[fromIdx] = seatingMap[targetIdx];
+  if (!Array.isArray(seatingMap) || seatingMap.length !== SEAT_COUNT) {
+    seatingMap = normalizeSeatingMap(seatingMap);
+  }
+  // Đổi chỗ (dùng '' cho chỗ trống – tránh null bị Firebase xoá)
+  const tmp = seatingMap[fromIdx] || '';
+  seatingMap[fromIdx] = seatingMap[targetIdx] || '';
   seatingMap[targetIdx] = tmp;
   dragSeatIndex = null;
   renderSeatingChart();
+  // Tự lưu ngay sau khi kéo thả để không mất vị trí
+  saveStorage(true).catch(() => {});
 }
 
 function onSeatDragEnd(e) {
-  e.currentTarget.classList.remove('opacity-50');
+  if (e.currentTarget) e.currentTarget.classList.remove('opacity-50');
   dragSeatIndex = null;
 }
 
 async function saveSeatingLayout() {
-  ensureSeatingMap();
-  logActivity('Lưu sơ đồ lớp', `Đã cập nhật vị trí chỗ ngồi`);
+  if (!Array.isArray(seatingMap) || seatingMap.length !== SEAT_COUNT) {
+    seatingMap = normalizeSeatingMap(seatingMap);
+  }
+  // Đảm bảo không còn null
+  seatingMap = seatingMap.map(id => id || '');
+  logActivity('Lưu sơ đồ lớp', 'Đã cập nhật vị trí chỗ ngồi');
   await saveStorage(true);
+  renderSeatingChart();
   alert('Đã lưu sơ đồ lớp thành công!');
 }
 
 async function resetSeatingToDefault() {
-  if (!confirm('Xếp lại chỗ ngồi theo tổ (Tổ 1 → hàng 1, Tổ 2 → hàng 2…)? Vị trí hiện tại sẽ bị ghi đè.')) return;
+  if (!confirm('Xếp lại chỗ ngồi theo tổ (Tổ 1 → hàng 1…)? Vị trí hiện tại sẽ bị ghi đè.')) return;
   seatingMap = buildDefaultSeating();
   logActivity('Xếp lại sơ đồ lớp', 'Theo tổ mặc định');
   await saveStorage(true);
