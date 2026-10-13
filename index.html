@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -205,6 +204,35 @@
     table thead { background: var(--sky-soft) !important; }
     table thead th { color: #3B7CB8; font-weight: 700; }
 
+    /* TKB – ngày hôm nay */
+    .tkb-today-head {
+      background: linear-gradient(180deg, #FEF3C7, #FDE68A) !important;
+      color: #92400E !important;
+      box-shadow: inset 0 -3px 0 #F59E0B;
+      position: relative;
+    }
+    .tkb-today-head::after {
+      content: 'Hôm nay';
+      display: block;
+      font-size: 9px;
+      font-weight: 700;
+      color: #B45309;
+      letter-spacing: 0.02em;
+    }
+    .tkb-today-cell {
+      background: rgba(253, 230, 138, 0.55) !important;
+      font-weight: 700 !important;
+      color: #78350F !important;
+      animation: tkbPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes tkbPulse {
+      0%, 100% { background: rgba(253, 230, 138, 0.45); box-shadow: inset 0 0 0 0 rgba(245, 158, 11, 0); }
+      50% { background: rgba(252, 211, 77, 0.75); box-shadow: inset 0 0 0 2px rgba(245, 158, 11, 0.35); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tkb-today-cell { animation: none !important; }
+    }
+
     /* Seating cells polish */
     .seat-cell {
       border-radius: 0.65rem !important;
@@ -240,20 +268,20 @@
     }
     /* Sơ đồ gọn trên mobile */
     #seatingGrid { gap: 0; }
-    #tab-sodo .seat-cell {
+    #tab-thongtin .seat-cell {
       min-width: 0 !important;
       max-width: none !important;
       padding: 0.2rem 0.15rem !important;
     }
-    #tab-sodo .seat-cell .seat-name {
+    #tab-thongtin .seat-cell .seat-name {
       font-size: 0.62rem;
       font-weight: 700;
       line-height: 1.15;
       -webkit-line-clamp: 2;
     }
     @media (min-width: 640px) {
-      #tab-sodo .seat-cell { padding: 0.35rem 0.25rem !important; }
-      #tab-sodo .seat-cell .seat-name { font-size: 0.72rem; }
+      #tab-thongtin .seat-cell { padding: 0.35rem 0.25rem !important; }
+      #tab-thongtin .seat-cell .seat-name { font-size: 0.72rem; }
     }
 
     /* Modals */
@@ -320,7 +348,7 @@
       }
       .tab-btn span { max-width: 4.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       /* Sơ đồ: thu gọn khung + lối đi */
-      #tab-sodo .seat-cell .seat-name { font-size: 0.68rem !important; font-weight: 700 !important; }
+      #tab-thongtin .seat-cell .seat-name { font-size: 0.68rem !important; font-weight: 700 !important; }
       #seatingGrid > div { gap: 0.2rem !important; margin-bottom: 0.3rem !important; }
       #seatingGrid .w-4, #seatingGrid .w-5, #seatingGrid .w-6 { width: 0.9rem !important; }
       #seatingGrid [style*="writing-mode"] { display: none !important; }
@@ -342,11 +370,21 @@
         </div>
       </div>
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <a href="tel:0979575127" id="btnCallGvcn" title="Gọi GVCN – Thầy Hưng: 0979575127"
+        <a href="tel:0979575127" id="btnCallGvcn" title="Gọi giáo viên chủ nhiệm – Thầy Hưng: 0979575127"
           class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-emerald-950 text-xs font-bold shadow-sm transition border border-white/30">
           <i class="fa-solid fa-phone"></i>
-          <span class="hidden xs:inline sm:inline">Gọi GVCN</span>
+          <span class="hidden sm:inline">Gọi giáo viên chủ nhiệm</span>
         </a>
+        <button type="button" id="btnStudentInfo" onclick="openStudentInfoModal()" title="Thông tin học sinh"
+          class="hidden inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-sky-950 text-xs font-bold shadow-sm transition border border-white/30">
+          <i class="fa-solid fa-id-card"></i>
+          <span class="hidden sm:inline">Thông tin học sinh</span>
+        </button>
+        <button type="button" id="btnHelpGuide" onclick="openHelpGuide()" title="Hướng dẫn sử dụng"
+          class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold shadow-sm transition border border-white/30">
+          <i class="fa-solid fa-circle-question"></i>
+          <span class="hidden sm:inline">Hướng dẫn</span>
+        </button>
         <div id="userBadge" class="hidden flex items-center gap-1.5 sm:gap-2">
           <div id="syncStatusBadge" class="flex items-center gap-1.5 text-[11px] bg-white/15 px-2.5 py-1 rounded-full backdrop-blur-sm">
             <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-300"></span>
@@ -366,11 +404,13 @@
   <!-- Navigation -->
   <nav id="mainNav" class="hidden fixed bottom-0 left-0 right-0 md:static md:top-[53px] border-t md:border-b md:border-t-0 z-40">
     <div class="max-w-7xl mx-auto px-2 md:px-4 flex justify-around md:justify-start gap-1 md:gap-2 py-1.5 md:py-2 text-xs font-semibold">
-      <button onclick="switchTab('tab-phuhuynh')" id="btn-tab-phuhuynh" class="tab-btn flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
+      <button onclick="switchTab('tab-phuhuynh')" id="btn-tab-phuhuynh" class="tab-btn relative flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
         <i class="fa-solid fa-house-user text-base md:text-sm"></i><span>Tổng quan con</span>
+        <span id="badgePhOverview" class="hidden absolute top-0.5 right-1 min-w-[1rem] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold leading-4 text-center">0</span>
       </button>
-      <button onclick="switchTab('tab-baobai')" id="btn-tab-baobai" class="tab-btn hidden flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
+      <button onclick="switchTab('tab-baobai')" id="btn-tab-baobai" class="tab-btn relative hidden flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
         <i class="fa-solid fa-book-open text-base md:text-sm"></i><span>Sổ báo bài</span>
+        <span id="badgeBaobai" class="hidden absolute top-0.5 right-1 min-w-[1rem] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold leading-4 text-center">0</span>
       </button>
       <button onclick="switchTab('tab-tkb')" id="btn-tab-tkb" class="tab-btn flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
         <i class="fa-solid fa-calendar-days text-base md:text-sm"></i><span>Thời khoá biểu</span>
@@ -378,14 +418,15 @@
       <button onclick="switchTab('tab-nendep')" id="btn-tab-nendep" class="tab-btn flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
         <i class="fa-solid fa-ranking-star text-base md:text-sm"></i><span>Thi đua cả lớp</span>
       </button>
-      <button onclick="switchTab('tab-sodo')" id="btn-tab-sodo" class="tab-btn flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
-        <i class="fa-solid fa-border-all text-base md:text-sm"></i><span>Sơ đồ lớp</span>
+      <button onclick="switchTab('tab-thongtin')" id="btn-tab-thongtin" class="tab-btn flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
+        <i class="fa-solid fa-circle-info text-base md:text-sm"></i><span>Thông tin lớp</span>
       </button>
       <button onclick="switchTab('tab-diemdanh')" id="btn-tab-diemdanh" class="tab-btn hidden flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
         <i class="fa-solid fa-clipboard-user text-base md:text-sm"></i><span>Điểm danh</span>
       </button>
-      <button onclick="switchTab('tab-thongbao')" id="btn-tab-thongbao" class="tab-btn flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
+      <button onclick="switchTab('tab-thongbao')" id="btn-tab-thongbao" class="tab-btn relative flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
         <i class="fa-solid fa-bullhorn text-base md:text-sm"></i><span>Thông báo</span>
+        <span id="badgeThongbao" class="hidden absolute top-0.5 right-1 min-w-[1rem] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold leading-4 text-center">0</span>
       </button>
       <button onclick="switchTab('tab-hoctap')" id="btn-tab-hoctap" class="tab-btn flex-1 md:flex-initial py-2 px-3 rounded-xl flex flex-col md:flex-row items-center justify-center gap-1 text-slate-500 hover:text-indigo-600 transition">
         <i class="fa-solid fa-pen-ruler text-base md:text-sm"></i><span>Học tập</span>
@@ -524,6 +565,8 @@
             </div>
           </div>
         </div>
+        <!-- Thông báo điểm danh / vắng mặt -->
+        <div id="phAttendanceAlerts" class="hidden space-y-2"></div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
             <div class="flex items-center justify-between border-b pb-2">
@@ -590,6 +633,7 @@
           <div>
             <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center gap-1.5"><i class="fa-solid fa-calendar-days text-indigo-600"></i> Thời Khoá Biểu Lớp 7A1</h3>
             <p class="text-[11px] text-slate-500">Từ Thứ 2 đến Thứ 6</p>
+            <p id="tkbTodayNote" class="text-[11px] text-amber-700 font-semibold mt-0.5 hidden"></p>
           </div>
           <div class="flex items-center gap-2">
             <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
@@ -749,66 +793,114 @@
       </div>
 
       <!-- TAB SƠ ĐỒ LỚP -->
-      <div id="tab-sodo" class="tab-content hidden space-y-4">
-        <div class="bg-white p-3.5 md:p-4 rounded-2xl border shadow-sm flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center gap-1.5">
-              <i class="fa-solid fa-border-all text-indigo-600"></i> Sơ Đồ Lớp 7A1
-            </h3>
-            <p class="text-[11px] text-slate-500">THCS Chu Văn An • Kéo thả để đổi chỗ ngồi (chỉ GVCN)</p>
+      <div id="tab-thongtin" class="tab-content hidden space-y-3">
+        <!-- Sub-tabs -->
+        <div class="flex bg-white p-1 rounded-2xl border shadow-sm gap-1 overflow-x-auto">
+          <button type="button" id="btnTtSodo" onclick="setThongTinView('sodo')" class="flex-1 min-w-[5.5rem] py-2.5 px-2 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 shadow-sm">
+            <i class="fa-solid fa-border-all mr-1"></i>Sơ đồ lớp
+          </button>
+          <button type="button" id="btnTtCommittee" onclick="setThongTinView('committee')" class="flex-1 min-w-[5.5rem] py-2.5 px-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50">
+            <i class="fa-solid fa-users mr-1"></i>Ban cán sự lớp
+          </button>
+          <button type="button" id="btnTtTeachers" onclick="setThongTinView('teachers')" class="flex-1 min-w-[5.5rem] py-2.5 px-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50">
+            <i class="fa-solid fa-chalkboard-user mr-1"></i>Giáo viên bộ môn
+          </button>
+        </div>
+
+        <!-- VIEW: Ban cán sự lớp -->
+        <div id="ttViewCommittee" class="hidden space-y-4">
+          <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+            <div class="flex items-center justify-between border-b pb-2">
+              <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-user-shield text-indigo-600 mr-1.5"></i> Ban cán sự lớp 7A1</h3>
+              <button id="btnSaveCommittee" onclick="saveCommitteeNames()" class="hidden px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-xl">Lưu tên cán sự</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs md:text-sm">
+                <thead class="bg-slate-100 text-slate-600 font-bold text-[11px] uppercase">
+                  <tr><th class="p-2 text-left">Chức vụ</th><th class="p-2 text-left">Họ và tên</th></tr>
+                </thead>
+                <tbody id="committeeTable" class="divide-y"></tbody>
+              </table>
+            </div>
           </div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <span id="sodoEditHint" class="hidden text-[11px] text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 font-medium">
-              <i class="fa-solid fa-hand-pointer mr-1"></i>Kéo thả đổi chỗ · Bấm <i class="fa-solid fa-pen text-[9px]"></i> để sửa tên
-            </span>
-            <button id="btnResetSeating" onclick="resetSeatingToDefault()" class="hidden px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
-              <i class="fa-solid fa-rotate-left mr-1"></i> Xếp lại theo tổ
-            </button>
-            <button id="btnSaveSeating" onclick="saveSeatingLayout()" class="hidden px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition">
-              <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu sơ đồ
+        </div>
+
+        <!-- VIEW: Giáo viên bộ môn -->
+        <div id="ttViewTeachers" class="hidden space-y-4">
+          <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-2">
+              <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-chalkboard-user text-indigo-600 mr-1.5"></i> Giáo viên bộ môn</h3>
+              <span class="text-[11px] text-slate-400">Giáo viên chủ nhiệm có thể sửa tên</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs md:text-sm">
+                <thead class="bg-slate-100 text-slate-600 font-bold text-[11px] uppercase">
+                  <tr>
+                    <th class="p-2 text-center w-12">STT</th>
+                    <th class="p-2 text-left">Họ và tên giáo viên</th>
+                    <th class="p-2 text-left">Bộ môn</th>
+                  </tr>
+                </thead>
+                <tbody id="subjectTeachersTable" class="divide-y"></tbody>
+              </table>
+            </div>
+            <button id="btnSaveTeachers" onclick="saveSubjectTeachers()" class="hidden px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl">
+              <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu danh sách giáo viên
             </button>
           </div>
         </div>
 
-        <!-- Classroom visual -->
-        <div class="bg-gradient-to-b from-sky-50 to-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <!-- Header info -->
-          <div class="bg-indigo-700 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-school text-amber-300"></i>
-              <span class="font-bold text-sm">SƠ ĐỒ LỚP HỌC – 7A1</span>
+        <!-- VIEW: Sơ đồ lớp -->
+        <div id="ttViewSodo" class="space-y-4">
+          <div class="bg-white p-3.5 md:p-4 rounded-2xl border shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center gap-1.5">
+                <i class="fa-solid fa-border-all text-indigo-600"></i> Sơ đồ lớp 7A1
+              </h3>
+              <p class="text-[11px] text-slate-500">THCS Chu Văn An • Kéo thả đổi chỗ (chỉ GVCN)</p>
             </div>
-            <div class="flex items-center gap-3 text-[11px] text-indigo-200">
-              <span><i class="fa-solid fa-calendar mr-1"></i>2026-2027</span>
-              <span><i class="fa-solid fa-chalkboard-user mr-1"></i>GVCN</span>
-            </div>
-          </div>
-
-          <!-- Board + Teacher desk -->
-          <div class="px-4 pt-4 pb-2 flex flex-col items-center gap-2">
-            <div class="w-full max-w-xl bg-emerald-700 text-white text-center py-2.5 rounded-lg shadow font-bold text-sm tracking-widest border-4 border-emerald-800">
-              BẢNG
-            </div>
-            <div class="bg-amber-100 border-2 border-amber-400 rounded-xl px-6 py-2 text-center shadow-sm">
-              <div class="text-[10px] text-amber-700 font-semibold">BÀN GIÁO VIÊN</div>
-              <i class="fa-solid fa-desktop text-amber-600 text-lg"></i>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="sodoEditHint" class="hidden text-[11px] text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 font-medium">
+                <i class="fa-solid fa-hand-pointer mr-1"></i>Kéo thả · Bấm <i class="fa-solid fa-pen text-[9px]"></i> sửa tên
+              </span>
+              <button id="btnResetSeating" onclick="resetSeatingToDefault()" class="hidden px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Xếp lại theo tổ
+              </button>
+              <button id="btnSaveSeating" onclick="saveSeatingLayout()" class="hidden px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition">
+                <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu sơ đồ
+              </button>
             </div>
           </div>
-
-          <!-- Seats grid -->
-          <div class="px-2 sm:px-4 pb-4 overflow-x-auto">
-            <div id="seatingGrid" class="min-w-[320px] space-y-2"></div>
-          </div>
-
-          <!-- Legend -->
-          <div class="px-4 pb-4 flex flex-wrap items-center justify-center gap-3 text-[10px] sm:text-[11px]">
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-200 border border-green-400"></span> Tổ 1</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-orange-200 border border-orange-400"></span> Tổ 2</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-sky-200 border border-sky-400"></span> Tổ 3</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-pink-200 border border-pink-400"></span> Tổ 4</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-100 border border-dashed border-slate-300"></span> Trống</span>
-            <span class="text-slate-400">|</span>
-            <span class="flex items-center gap-1 text-amber-600 font-bold"><i class="fa-solid fa-star text-[9px]"></i> Cán sự</span>
+          <div class="bg-gradient-to-b from-sky-50 to-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-indigo-700 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-school text-amber-300"></i>
+                <span class="font-bold text-sm">SƠ ĐỒ LỚP HỌC – 7A1</span>
+              </div>
+              <div class="flex items-center gap-3 text-[11px] text-indigo-200">
+                <span><i class="fa-solid fa-calendar mr-1"></i>2026-2027</span>
+                <span><i class="fa-solid fa-chalkboard-user mr-1"></i>GVCN</span>
+              </div>
+            </div>
+            <div class="px-4 pt-4 pb-2 flex flex-col items-center gap-2">
+              <div class="w-full max-w-xl bg-emerald-700 text-white text-center py-2.5 rounded-lg shadow font-bold text-sm tracking-widest border-4 border-emerald-800">BẢNG</div>
+              <div class="bg-amber-100 border-2 border-amber-400 rounded-xl px-6 py-2 text-center shadow-sm">
+                <div class="text-[10px] text-amber-700 font-semibold">BÀN GIÁO VIÊN</div>
+                <i class="fa-solid fa-desktop text-amber-600 text-lg"></i>
+              </div>
+            </div>
+            <div class="px-2 sm:px-4 pb-4 overflow-x-auto">
+              <div id="seatingGrid" class="min-w-[320px] space-y-2"></div>
+            </div>
+            <div class="px-4 pb-4 flex flex-wrap items-center justify-center gap-3 text-[10px] sm:text-[11px]">
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-200 border border-green-400"></span> Tổ 1</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-orange-200 border border-orange-400"></span> Tổ 2</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-sky-200 border border-sky-400"></span> Tổ 3</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-pink-200 border border-pink-400"></span> Tổ 4</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-100 border border-dashed border-slate-300"></span> Trống</span>
+              <span class="text-slate-400">|</span>
+              <span class="flex items-center gap-1 text-amber-600 font-bold"><i class="fa-solid fa-star text-[9px]"></i> Top tổ</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1106,6 +1198,77 @@
       <div class="flex justify-end gap-2 pt-2 border-t">
         <button type="button" onclick="closeTkbModal()" class="px-4 py-2 border rounded-xl text-xs font-semibold text-slate-600">Hủy</button>
         <button type="button" onclick="saveTkbFromModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow">Lưu Thời Khoá Biểu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hướng dẫn sử dụng -->
+  <div id="helpGuideModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="flex justify-between items-center border-b px-4 py-3 bg-indigo-50">
+        <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-circle-question text-indigo-600 mr-1.5"></i> Hướng dẫn sử dụng</h3>
+        <button type="button" onclick="closeHelpGuide()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 text-sm text-slate-700 space-y-4 custom-scroll">
+        <div class="p-3 rounded-xl bg-sky-50 border border-sky-100">
+          <h4 class="font-bold text-sky-800 mb-1"><i class="fa-solid fa-users mr-1"></i> Phụ huynh / Học sinh</h4>
+          <ul class="list-disc pl-5 text-xs space-y-1">
+            <li>Xem <b>Tổng quan con</b>, báo bài, thời khoá biểu, thi đua, sơ đồ lớp.</li>
+            <li>Đánh dấu đã làm bài (nếu có), đọc <b>Thông báo</b>, nhắn tin giáo viên chủ nhiệm.</li>
+            <li>Xin nghỉ có lý do → chờ duyệt; xem điểm danh / chuyên cần.</li>
+            <li>Cập nhật <b>Thông tin học sinh</b> và sức khỏe; tải ảnh (tự nén, lưu trên máy).</li>
+            <li>Đổi mật khẩu ngay nếu vẫn dùng mật khẩu mặc định.</li>
+          </ul>
+        </div>
+        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+          <h4 class="font-bold text-emerald-800 mb-1"><i class="fa-solid fa-user-shield mr-1"></i> Ban cán sự lớp</h4>
+          <ul class="list-disc pl-5 text-xs space-y-1">
+            <li>Chấm điểm thi đua theo phạm vi được giao (lớp / tổ).</li>
+            <li>Theo dõi báo bài, sơ đồ lớp; không xem hộp thư riêng của giáo viên chủ nhiệm.</li>
+            <li>Tổ trưởng chỉ chấm học sinh trong tổ của mình.</li>
+          </ul>
+        </div>
+        <div class="p-3 rounded-xl bg-amber-50 border border-amber-100">
+          <h4 class="font-bold text-amber-900 mb-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Giáo viên chủ nhiệm</h4>
+          <ul class="list-disc pl-5 text-xs space-y-1">
+            <li>Đầy đủ quyền: điểm danh, duyệt nghỉ, thông báo, cấu hình, sơ đồ, hồ sơ học sinh.</li>
+            <li>Sao lưu JSON định kỳ; xuất báo cáo tuần / tháng khi cần gửi phụ huynh.</li>
+            <li>Không chia sẻ đường dẫn cơ sở dữ liệu công khai.</li>
+          </ul>
+        </div>
+        <p class="text-[11px] text-slate-500 border-t pt-2">Dữ liệu dùng nội bộ lớp 7A1. Ảnh học sinh lưu trên thiết bị đăng nhập (không đồng bộ cloud). Lịch sử thao tác chỉ giáo viên chủ nhiệm xem, tự xóa sau 14 ngày.</p>
+      </div>
+      <div class="border-t px-4 py-3 flex justify-end">
+        <button type="button" onclick="closeHelpGuide()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl">Đã hiểu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Thông tin học sinh -->
+  <div id="studentInfoModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
+      <div class="flex justify-between items-center border-b px-4 py-3 bg-sky-50">
+        <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-id-card text-sky-600 mr-1.5"></i> Thông tin học sinh</h3>
+        <button type="button" onclick="closeStudentInfoModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="px-4 pt-3" id="siSelectWrap">
+        <label class="block text-xs font-bold text-slate-600 mb-1">Chọn học sinh</label>
+        <select id="siStudentSelect" onchange="onSiStudentChange()" class="w-full p-2.5 border rounded-xl text-sm bg-white"></select>
+      </div>
+      <div class="flex gap-1 px-4 pt-3">
+        <button type="button" id="btnSiTabInfo" onclick="setSiTab('info')" class="flex-1 py-2 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700">Thông tin học sinh</button>
+        <button type="button" id="btnSiTabHealth" onclick="setSiTab('health')" class="flex-1 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50">Sức khỏe học sinh</button>
+      </div>
+      <div class="flex-1 overflow-y-auto px-4 py-3 custom-scroll" id="siBody">
+        <!-- filled by JS -->
+      </div>
+      <div class="border-t px-4 py-3 flex flex-wrap justify-end gap-2 bg-slate-50">
+        <button type="button" id="btnSiExport" onclick="exportCurrentSiTab()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">
+          <i class="fa-solid fa-file-excel mr-1"></i> Xuất Excel
+        </button>
+        <button type="button" onclick="closeStudentInfoModal()" class="px-3 py-2 border rounded-xl text-xs font-semibold text-slate-600">Đóng</button>
+        <button type="button" id="btnSiEdit" onclick="toggleSiEdit()" class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold hidden">Sửa</button>
+        <button type="button" id="btnSiSave" onclick="saveStudentInfo()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold hidden">Lưu</button>
       </div>
     </div>
   </div>
@@ -1489,7 +1652,50 @@ let announcements = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'announceme
 let grades = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'grades')) || []; // {id,studentId,subject,type,score,note,date,week}
 let studentNotes = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'studentNotes')) || {}; // {studentId: note}
 let schoolEvents = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'events')) || []; // {id,title,date,type}
+
+let studentProfiles = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'profiles')) || {"HS101": {"code": "2508275924", "gender": "Nữ", "dob": "23/01/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Tân An, Đắk Lắk", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314007051", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Phạm Quốc Sương", "fatherPhone": "0933128869", "motherName": "Đậu Nữ Thùy Anh", "motherPhone": "0975903045", "phone": "0933128869", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS102": {"code": "2508275784", "gender": "Nữ", "dob": "20/12/2013", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Lam Thành, Nghệ An", "cccd": "067313002210", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Thanh Chương", "fatherPhone": "0973736178", "motherName": "Tôn Thị Thanh Tuyền", "motherPhone": "0949032336", "phone": "0973736178", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS103": {"code": "2508276504", "gender": "Nữ", "dob": "05/01/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hương Sơn, Tỉnh Hà Tĩnh (Cũ), Xã Sơn Tiến, Hà Tĩnh", "cccd": "067314006916", "cccdDate": "28/10/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Ngọc Thông", "fatherPhone": "0972030767", "motherName": "Nguyễn Thị Hải Yến", "motherPhone": "", "phone": "0972030767", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS104": {"code": "2508276284", "gender": "Nữ", "dob": "14/02/2014", "address": "Thôn Mỹ Yên, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Nghệ An (Theo GKS), Xã Hưng Nguyên, Nghệ An", "hometown": "Huyện Hưng Nguyên, Tỉnh nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "040314025768", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Văn Hậu", "fatherPhone": "0966432204", "motherName": "Nguyễn Thị Hảo", "motherPhone": "0969495542", "phone": "0969495542", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS105": {"code": "2508276404", "gender": "Nữ", "dob": "10/10/2014", "address": "Thôn Mỹ Yên, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Phường Cửa Lò, Nghệ An", "cccd": "067314001970", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Văn Chính", "fatherPhone": "0908374408", "motherName": "Lê Vũ Thị Hồng Ngọc", "motherPhone": "", "phone": "0908374408", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS106": {"code": "2508276204", "gender": "Nữ", "dob": "01/01/2014", "address": "Thôn Hòa Phong, Xã Đắk Sắk, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Mỹ Đức, TP. Hà Nội (Cũ), Xã Phúc Sơn, TP. Hà Nội", "cccd": "067314005867", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "", "fatherPhone": "", "motherName": "Nguyễn Thị Thanh Trâm", "motherPhone": "0901915426", "phone": "0901915426", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS107": {"code": "2508276704", "gender": "Nữ", "dob": "22/02/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314007734", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Anh Tuấn", "fatherPhone": "0339835620", "motherName": "Nguyễn Thị Sự", "motherPhone": "0369212910", "phone": "0339835620", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS108": {"code": "2508275684", "gender": "Nữ", "dob": "23/07/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067314004969", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trần Trọng Kiều", "fatherPhone": "0363632011", "motherName": "Trần Thị Thu", "motherPhone": "0932398396", "phone": "0363632011", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS109": {"code": "2508276364", "gender": "Nam", "dob": "01/01/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Diễn Châu, Tình Nghệ An (Cũ), Xã An Châu, Nghệ An", "cccd": "067214003645", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Phan Anh Tú", "fatherPhone": "0388405364", "motherName": "Nguyễn Thị Phúc", "motherPhone": "0825270468", "phone": "0825270468", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS110": {"code": "2508276524", "gender": "Nữ", "dob": "30/04/2014", "address": "Thôn Mỹ Yên, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314004963", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trương Nguyễn Anh Giang", "fatherPhone": "", "motherName": "Trương Nguyễn Thùy Liên", "motherPhone": "0935444473", "phone": "0935444473", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS111": {"code": "2508275304", "gender": "Nữ", "dob": "01/01/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314006391", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Công Hiến", "fatherPhone": "0826989830", "motherName": "Nguyễn Thị Thanh Trúc", "motherPhone": "0826989831", "phone": "0826989830", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS112": {"code": "2508276164", "gender": "Nữ", "dob": "30/03/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Tuy Phước - Tỉnh Bình Định (Cũ), Xã Tuy Phước Bắc, Gia Lai", "cccd": "052314007330", "cccdDate": "", "ethnicity": "Kinh", "religion": "Không", "circumstance": "", "fatherName": "Đinh Văn Mẫn", "fatherPhone": "0855059794", "motherName": "Phạm Thị Hoàng", "motherPhone": "0368666305", "phone": "0368666305", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS201": {"code": "2508276544", "gender": "Nữ", "dob": "06/02/2014", "address": "Thôn Bình Thuân, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên, Tỉnh Nghệ An (Cũ), Xã Hưng Nguyên, Nghệ An", "cccd": "067314008291", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Trung Kiên", "fatherPhone": "0976059978", "motherName": "Nguyễn Ngọc Châu Trân", "motherPhone": "0917748737", "phone": "0917748737", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS202": {"code": "2508276144", "gender": "Nữ", "dob": "27/07/2014", "address": "Thôn Sơn Hà, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Phú Lộc, Tỉnh Thừa Thiên Huế (cũ), Xã Phú Lộc, Thành phố Huế", "cccd": "067314001298", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Lưu Anh Dũng", "fatherPhone": "0822740748", "motherName": "Lê Hoàng Vi", "motherPhone": "0813011130", "phone": "0813011130", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS203": {"code": "2508276224", "gender": "Nữ", "dob": "20/11/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314003068", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Duy Pháp", "fatherPhone": "0965732288", "motherName": "Hà Thị Thủy", "motherPhone": "0388387359", "phone": "0388387359", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS204": {"code": "2508276104", "gender": "Nữ", "dob": "16/10/2014", "address": "Bon Bu Đăk, Xã Quảng Trực, Lâm Đồng", "birthPlace": "Thành phố Hồ Chí Minh (Theo GKS), Phường Bình Thạnh, TP. Hồ Chí Minh", "hometown": "Huyện Nghĩa Hưng, Tỉnh Nam Định (Cũ), Xã Nghĩa Lâm, Ninh Bình", "cccd": "067314000139", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "", "fatherPhone": "", "motherName": "Đinh Thị Thúy Nhi", "motherPhone": "0359855972", "phone": "0359855972", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS205": {"code": "2508275944", "gender": "Nam", "dob": "26/12/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Núi Thành - Tỉnh Quảng Nam, Xã Núi Thành, TP. Đà Nẵng", "cccd": "067214002326", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Ngô Thành Chinh", "fatherPhone": "0367897191", "motherName": "Phạm Thị Kiều Chinh", "motherPhone": "", "phone": "0367897191", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS206": {"code": "2508276184", "gender": "Nữ", "dob": "25/03/2014", "address": "Thôn Kẻ Đọng, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Hương Sơn, Tỉnh Hà Tĩnh (Cũ), Xã Hương Sơn, Hà Tĩnh", "cccd": "067314003141", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Chí Thiện", "fatherPhone": "0972301041", "motherName": "Nguyễn Thị Bích Phương", "motherPhone": "0969301041", "phone": "0969301041", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS207": {"code": "2508275744", "gender": "Nữ", "dob": "19/09/2014", "address": "Thôn 9, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Hương Khê, Tỉnh Hà Tĩnh (Cũ), Xã Phúc Trạch, Hà Tĩnh", "cccd": "067314003799", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Võ Tá Hoàng", "fatherPhone": "0982337255", "motherName": "Hà Thị Thanh", "motherPhone": "0968044744", "phone": "0982337255", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS208": {"code": "2508276484", "gender": "Nữ", "dob": "17/09/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Diễn Châu, Tỉnh Nghệ An (Cũ), Xã An Châu, Nghệ An", "cccd": "067314005352", "cccdDate": "28/10/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Hồng Chương", "fatherPhone": "0979707038", "motherName": "Nguyễn Thị Liệu", "motherPhone": "", "phone": "0979707038", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS209": {"code": "2508275844", "gender": "Nam", "dob": "02/04/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Diễn Châu, Tỉnh Nghệ An (Cũ), Xã Minh Châu, Nghệ An", "cccd": "067214002535", "cccdDate": "12/11/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Như Trịnh", "fatherPhone": "0854037323", "motherName": "Cao Thị Thanh Vân", "motherPhone": "-1", "phone": "0854037323", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS210": {"code": "2508275824", "gender": "Nữ", "dob": "21/11/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Xuân, Tỉnh Hà Tỉnh (Cũ), Xã Nghi Xuân, Hà Tĩnh", "cccd": "067314003330", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Huy Thông", "fatherPhone": "0915602488", "motherName": "Trần Thị Minh Thu", "motherPhone": "", "phone": "0915602488", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS211": {"code": "2508275804", "gender": "Nam", "dob": "17/02/2014", "address": "Thôn Xuân Sơn, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067214005676", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Ngô Thanh Tín", "fatherPhone": "0966516512", "motherName": "Võ Minh Thanh Thủy", "motherPhone": "0869887583", "phone": "0966516512", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS301": {"code": "2508276024", "gender": "Nữ", "dob": "27/03/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Diễn Châu, Tỉnh Nghệ An (Cũ), Xã An Châu, Nghệ An", "cccd": "067314003789", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Lê Văn Hiền", "fatherPhone": "0358326812", "motherName": "Nguyễn Thị Thanh Tuyền", "motherPhone": "0905598396", "phone": "0358326812", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS302": {"code": "2508275864", "gender": "Nữ", "dob": "07/08/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Diễn Châu - Tỉnh Nghệ An (Cũ), Xã Diễn Châu, Nghệ An", "cccd": "067314002707", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Quốc Thiện", "fatherPhone": "0905307308", "motherName": "Ngô Anh Nhi", "motherPhone": "0903502824", "phone": "0905307308", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS303": {"code": "2508276044", "gender": "Nữ", "dob": "30/07/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Phú Vang, Tỉnh Thừa Thiên Huế (Cũ), Xã Phú Vinh, Thành phố Huế", "cccd": "067314001966", "cccdDate": "28/10/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Thanh Mến", "fatherPhone": "0905144786", "motherName": "Trần Thị Lan", "motherPhone": "0343057544", "phone": "0905144786", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS304": {"code": "2508275964", "gender": "Nữ", "dob": "09/01/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314009265", "cccdDate": "14/09/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Song Vũ", "fatherPhone": "0379794673", "motherName": "Nguyễn Thị Phương Lan", "motherPhone": "0973836213", "phone": "0379794673", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS305": {"code": "2508275664", "gender": "Nữ", "dob": "30/04/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314006289", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Hà Thanh Hải", "fatherPhone": "0793607485", "motherName": "Nguyễn Nữ Huyền Tâm", "motherPhone": "", "phone": "0793607485", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS306": {"code": "2508276064", "gender": "Nữ", "dob": "17/01/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hoài Nhơn - Tỉnh Bình Định (Cũ), Phường Hoài Nhơn Đông, Gia Lai", "cccd": "067314002658", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Văn Đức", "fatherPhone": "0937091164", "motherName": "Nguyễn Thị Hoa", "motherPhone": "0987091084", "phone": "0937091164", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS307": {"code": "2508275724", "gender": "Nam", "dob": "08/04/2014", "address": "Thôn Kẻ Đọng, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Xuân - Tỉnh Hà Tĩnh (Cũ), Xã Nghi Xuân, Hà Tĩnh", "cccd": "067214008735", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Hồ Sỹ Tuấn", "fatherPhone": "0973730515", "motherName": "Nguyễn Bạch Hải Âu", "motherPhone": "0906448448", "phone": "0973730515", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS308": {"code": "2508276324", "gender": "Nữ", "dob": "02/06/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314006974", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trương Quang Minh", "fatherPhone": "0978775517", "motherName": "Nguyễn Thị Mai", "motherPhone": "0978757819", "phone": "0978757819", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS309": {"code": "2508276444", "gender": "Nữ", "dob": "28/01/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314009269", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Ngô Bảo Toàn", "fatherPhone": "0946058468", "motherName": "Nguyễn Thái Kim Uyên", "motherPhone": "0946958468", "phone": "0946958468", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS310": {"code": "2508276004", "gender": "Nam", "dob": "12/04/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067214001988", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Thanh Phong", "fatherPhone": "0935491533", "motherName": "Phan Thị Thảo Ly", "motherPhone": "0377327673", "phone": "0935491533", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS401": {"code": "2508276424", "gender": "Nam", "dob": "23/02/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067214003313", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Văn Thái", "fatherPhone": "0932464393", "motherName": "Nguyễn Thị Ánh Hồng", "motherPhone": "0935954488", "phone": "0935954488", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS402": {"code": "2508275984", "gender": "Nữ", "dob": "23/08/2014", "address": "Thôn Xuân Sơn, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nam Đàn - Tỉnh Nghệ An (Cũ), Xã Đại Huệ, Nghệ An", "cccd": "067314001196", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Tiến Thông", "fatherPhone": "0949223032", "motherName": "Nguyễn Thị Cẩm Tiên", "motherPhone": "", "phone": "0949223032", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS403": {"code": "2508275644", "gender": "Nam", "dob": "05/02/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067214006598", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Đặng Thái Linh", "fatherPhone": "0795566230", "motherName": "Phan Thị Mỹ Huệ", "motherPhone": "0935947674", "phone": "0795566230", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS404": {"code": "2508275704", "gender": "Nữ", "dob": "17/02/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067314002703", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trần Đức Nhiên", "fatherPhone": "0901998328", "motherName": "Nguyễn Thị Đường", "motherPhone": "0762535239", "phone": "0901998328", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS405": {"code": "2508276084", "gender": "Nữ", "dob": "21/07/2014", "address": "Thôn Sơn Hà, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314007169", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Ngô Văn Hương", "fatherPhone": "0937644123", "motherName": "Nguyễn Thị Hà", "motherPhone": "0366048849", "phone": "0366048849", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS406": {"code": "2508276344", "gender": "Nữ", "dob": "08/04/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Yên Thành - Tỉnh Nghệ An (Cũ), Xã Quan Thành, Nghệ An", "cccd": "067314009270", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trần Danh Thành", "fatherPhone": "0396549659", "motherName": "Phan Thị Ái", "motherPhone": "0963664503", "phone": "0963664503", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS407": {"code": "2508276464", "gender": "Nữ", "dob": "18/08/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314007423", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Duy Trực", "fatherPhone": "0989366513", "motherName": "Ngô Thị Nguyệt Ánh", "motherPhone": "0973930789", "phone": "0973930789", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS408": {"code": "2508275884", "gender": "Nữ", "dob": "30/10/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Đại Huệ, Tỉnh Nghệ An (Cũ), Xã Đại Huệ, Nghệ An", "cccd": "067314006018", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Đình Phú", "fatherPhone": "0963067973", "motherName": "Trương Anh Túc", "motherPhone": "0914539176", "phone": "0963067973", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS409": {"code": "2508275764", "gender": "Nữ", "dob": "13/06/2014", "address": "Thôn Mỹ Hoà, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Phúc Lộc, Nghệ An", "cccd": "040314004464", "cccdDate": "", "ethnicity": "Kinh", "religion": "Không", "circumstance": "", "fatherName": "Nguyễn Đình Hòa", "fatherPhone": "0908041234", "motherName": "Dương Thị Sen", "motherPhone": "0399094404", "phone": "0908041234", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS410": {"code": "2508276124", "gender": "Nữ", "dob": "25/03/2014", "address": "Thôn Kẻ Đọng, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hương Sơn, Tỉnh Hà Tĩnh (Cũ), Xã Sơn Tiến, Hà Tĩnh", "cccd": "067314001601", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Lê Minh Hải", "fatherPhone": "0906404541", "motherName": "Nguyễn Thị Thanh Thủy", "motherPhone": "0826227593", "phone": "0826227593", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS411": {"code": "2508276244", "gender": "Nam", "dob": "17/03/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067214004122", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Phạm Công Thoại", "fatherPhone": "0975156561", "motherName": "Nguyễn Thị Thùy Trinh", "motherPhone": "0933352124", "phone": "0933352124", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS412": {"code": "2508276304", "gender": "Nam", "dob": "11/01/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067214006481", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Hà Thanh Tùng", "fatherPhone": "0908747454", "motherName": "Hồ Đỗ Quyên", "motherPhone": "0932408206", "phone": "0932408206", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}};
+// merge defaults for missing keys
+(function mergeProfiles() {
+  const def = {"HS101": {"code": "2508275924", "gender": "Nữ", "dob": "23/01/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Tân An, Đắk Lắk", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314007051", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Phạm Quốc Sương", "fatherPhone": "0933128869", "motherName": "Đậu Nữ Thùy Anh", "motherPhone": "0975903045", "phone": "0933128869", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS102": {"code": "2508275784", "gender": "Nữ", "dob": "20/12/2013", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Lam Thành, Nghệ An", "cccd": "067313002210", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Thanh Chương", "fatherPhone": "0973736178", "motherName": "Tôn Thị Thanh Tuyền", "motherPhone": "0949032336", "phone": "0973736178", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS103": {"code": "2508276504", "gender": "Nữ", "dob": "05/01/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hương Sơn, Tỉnh Hà Tĩnh (Cũ), Xã Sơn Tiến, Hà Tĩnh", "cccd": "067314006916", "cccdDate": "28/10/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Ngọc Thông", "fatherPhone": "0972030767", "motherName": "Nguyễn Thị Hải Yến", "motherPhone": "", "phone": "0972030767", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS104": {"code": "2508276284", "gender": "Nữ", "dob": "14/02/2014", "address": "Thôn Mỹ Yên, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Nghệ An (Theo GKS), Xã Hưng Nguyên, Nghệ An", "hometown": "Huyện Hưng Nguyên, Tỉnh nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "040314025768", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Văn Hậu", "fatherPhone": "0966432204", "motherName": "Nguyễn Thị Hảo", "motherPhone": "0969495542", "phone": "0969495542", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS105": {"code": "2508276404", "gender": "Nữ", "dob": "10/10/2014", "address": "Thôn Mỹ Yên, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Phường Cửa Lò, Nghệ An", "cccd": "067314001970", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Văn Chính", "fatherPhone": "0908374408", "motherName": "Lê Vũ Thị Hồng Ngọc", "motherPhone": "", "phone": "0908374408", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS106": {"code": "2508276204", "gender": "Nữ", "dob": "01/01/2014", "address": "Thôn Hòa Phong, Xã Đắk Sắk, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Mỹ Đức, TP. Hà Nội (Cũ), Xã Phúc Sơn, TP. Hà Nội", "cccd": "067314005867", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "", "fatherPhone": "", "motherName": "Nguyễn Thị Thanh Trâm", "motherPhone": "0901915426", "phone": "0901915426", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS107": {"code": "2508276704", "gender": "Nữ", "dob": "22/02/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314007734", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Anh Tuấn", "fatherPhone": "0339835620", "motherName": "Nguyễn Thị Sự", "motherPhone": "0369212910", "phone": "0339835620", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS108": {"code": "2508275684", "gender": "Nữ", "dob": "23/07/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067314004969", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trần Trọng Kiều", "fatherPhone": "0363632011", "motherName": "Trần Thị Thu", "motherPhone": "0932398396", "phone": "0363632011", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS109": {"code": "2508276364", "gender": "Nam", "dob": "01/01/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Diễn Châu, Tình Nghệ An (Cũ), Xã An Châu, Nghệ An", "cccd": "067214003645", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Phan Anh Tú", "fatherPhone": "0388405364", "motherName": "Nguyễn Thị Phúc", "motherPhone": "0825270468", "phone": "0825270468", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS110": {"code": "2508276524", "gender": "Nữ", "dob": "30/04/2014", "address": "Thôn Mỹ Yên, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314004963", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trương Nguyễn Anh Giang", "fatherPhone": "", "motherName": "Trương Nguyễn Thùy Liên", "motherPhone": "0935444473", "phone": "0935444473", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS111": {"code": "2508275304", "gender": "Nữ", "dob": "01/01/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314006391", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Công Hiến", "fatherPhone": "0826989830", "motherName": "Nguyễn Thị Thanh Trúc", "motherPhone": "0826989831", "phone": "0826989830", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS112": {"code": "2508276164", "gender": "Nữ", "dob": "30/03/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Tuy Phước - Tỉnh Bình Định (Cũ), Xã Tuy Phước Bắc, Gia Lai", "cccd": "052314007330", "cccdDate": "", "ethnicity": "Kinh", "religion": "Không", "circumstance": "", "fatherName": "Đinh Văn Mẫn", "fatherPhone": "0855059794", "motherName": "Phạm Thị Hoàng", "motherPhone": "0368666305", "phone": "0368666305", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS201": {"code": "2508276544", "gender": "Nữ", "dob": "06/02/2014", "address": "Thôn Bình Thuân, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên, Tỉnh Nghệ An (Cũ), Xã Hưng Nguyên, Nghệ An", "cccd": "067314008291", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Trung Kiên", "fatherPhone": "0976059978", "motherName": "Nguyễn Ngọc Châu Trân", "motherPhone": "0917748737", "phone": "0917748737", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS202": {"code": "2508276144", "gender": "Nữ", "dob": "27/07/2014", "address": "Thôn Sơn Hà, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Phú Lộc, Tỉnh Thừa Thiên Huế (cũ), Xã Phú Lộc, Thành phố Huế", "cccd": "067314001298", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Lưu Anh Dũng", "fatherPhone": "0822740748", "motherName": "Lê Hoàng Vi", "motherPhone": "0813011130", "phone": "0813011130", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS203": {"code": "2508276224", "gender": "Nữ", "dob": "20/11/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314003068", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Duy Pháp", "fatherPhone": "0965732288", "motherName": "Hà Thị Thủy", "motherPhone": "0388387359", "phone": "0388387359", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS204": {"code": "2508276104", "gender": "Nữ", "dob": "16/10/2014", "address": "Bon Bu Đăk, Xã Quảng Trực, Lâm Đồng", "birthPlace": "Thành phố Hồ Chí Minh (Theo GKS), Phường Bình Thạnh, TP. Hồ Chí Minh", "hometown": "Huyện Nghĩa Hưng, Tỉnh Nam Định (Cũ), Xã Nghĩa Lâm, Ninh Bình", "cccd": "067314000139", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "", "fatherPhone": "", "motherName": "Đinh Thị Thúy Nhi", "motherPhone": "0359855972", "phone": "0359855972", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS205": {"code": "2508275944", "gender": "Nam", "dob": "26/12/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Núi Thành - Tỉnh Quảng Nam, Xã Núi Thành, TP. Đà Nẵng", "cccd": "067214002326", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Ngô Thành Chinh", "fatherPhone": "0367897191", "motherName": "Phạm Thị Kiều Chinh", "motherPhone": "", "phone": "0367897191", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS206": {"code": "2508276184", "gender": "Nữ", "dob": "25/03/2014", "address": "Thôn Kẻ Đọng, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Hương Sơn, Tỉnh Hà Tĩnh (Cũ), Xã Hương Sơn, Hà Tĩnh", "cccd": "067314003141", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Chí Thiện", "fatherPhone": "0972301041", "motherName": "Nguyễn Thị Bích Phương", "motherPhone": "0969301041", "phone": "0969301041", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS207": {"code": "2508275744", "gender": "Nữ", "dob": "19/09/2014", "address": "Thôn 9, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Hương Khê, Tỉnh Hà Tĩnh (Cũ), Xã Phúc Trạch, Hà Tĩnh", "cccd": "067314003799", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Võ Tá Hoàng", "fatherPhone": "0982337255", "motherName": "Hà Thị Thanh", "motherPhone": "0968044744", "phone": "0982337255", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS208": {"code": "2508276484", "gender": "Nữ", "dob": "17/09/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Diễn Châu, Tỉnh Nghệ An (Cũ), Xã An Châu, Nghệ An", "cccd": "067314005352", "cccdDate": "28/10/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Hồng Chương", "fatherPhone": "0979707038", "motherName": "Nguyễn Thị Liệu", "motherPhone": "", "phone": "0979707038", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS209": {"code": "2508275844", "gender": "Nam", "dob": "02/04/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Diễn Châu, Tỉnh Nghệ An (Cũ), Xã Minh Châu, Nghệ An", "cccd": "067214002535", "cccdDate": "12/11/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Như Trịnh", "fatherPhone": "0854037323", "motherName": "Cao Thị Thanh Vân", "motherPhone": "-1", "phone": "0854037323", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS210": {"code": "2508275824", "gender": "Nữ", "dob": "21/11/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Xuân, Tỉnh Hà Tỉnh (Cũ), Xã Nghi Xuân, Hà Tĩnh", "cccd": "067314003330", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Huy Thông", "fatherPhone": "0915602488", "motherName": "Trần Thị Minh Thu", "motherPhone": "", "phone": "0915602488", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS211": {"code": "2508275804", "gender": "Nam", "dob": "17/02/2014", "address": "Thôn Xuân Sơn, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067214005676", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Ngô Thanh Tín", "fatherPhone": "0966516512", "motherName": "Võ Minh Thanh Thủy", "motherPhone": "0869887583", "phone": "0966516512", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS301": {"code": "2508276024", "gender": "Nữ", "dob": "27/03/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Diễn Châu, Tỉnh Nghệ An (Cũ), Xã An Châu, Nghệ An", "cccd": "067314003789", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Lê Văn Hiền", "fatherPhone": "0358326812", "motherName": "Nguyễn Thị Thanh Tuyền", "motherPhone": "0905598396", "phone": "0358326812", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS302": {"code": "2508275864", "gender": "Nữ", "dob": "07/08/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Diễn Châu - Tỉnh Nghệ An (Cũ), Xã Diễn Châu, Nghệ An", "cccd": "067314002707", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Quốc Thiện", "fatherPhone": "0905307308", "motherName": "Ngô Anh Nhi", "motherPhone": "0903502824", "phone": "0905307308", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS303": {"code": "2508276044", "gender": "Nữ", "dob": "30/07/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Phú Vang, Tỉnh Thừa Thiên Huế (Cũ), Xã Phú Vinh, Thành phố Huế", "cccd": "067314001966", "cccdDate": "28/10/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Thanh Mến", "fatherPhone": "0905144786", "motherName": "Trần Thị Lan", "motherPhone": "0343057544", "phone": "0905144786", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS304": {"code": "2508275964", "gender": "Nữ", "dob": "09/01/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314009265", "cccdDate": "14/09/2024", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Song Vũ", "fatherPhone": "0379794673", "motherName": "Nguyễn Thị Phương Lan", "motherPhone": "0973836213", "phone": "0379794673", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS305": {"code": "2508275664", "gender": "Nữ", "dob": "30/04/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc - Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314006289", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Hà Thanh Hải", "fatherPhone": "0793607485", "motherName": "Nguyễn Nữ Huyền Tâm", "motherPhone": "", "phone": "0793607485", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS306": {"code": "2508276064", "gender": "Nữ", "dob": "17/01/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hoài Nhơn - Tỉnh Bình Định (Cũ), Phường Hoài Nhơn Đông, Gia Lai", "cccd": "067314002658", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Văn Đức", "fatherPhone": "0937091164", "motherName": "Nguyễn Thị Hoa", "motherPhone": "0987091084", "phone": "0937091164", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS307": {"code": "2508275724", "gender": "Nam", "dob": "08/04/2014", "address": "Thôn Kẻ Đọng, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Xuân - Tỉnh Hà Tĩnh (Cũ), Xã Nghi Xuân, Hà Tĩnh", "cccd": "067214008735", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Hồ Sỹ Tuấn", "fatherPhone": "0973730515", "motherName": "Nguyễn Bạch Hải Âu", "motherPhone": "0906448448", "phone": "0973730515", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS308": {"code": "2508276324", "gender": "Nữ", "dob": "02/06/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314006974", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trương Quang Minh", "fatherPhone": "0978775517", "motherName": "Nguyễn Thị Mai", "motherPhone": "0978757819", "phone": "0978757819", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS309": {"code": "2508276444", "gender": "Nữ", "dob": "28/01/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314009269", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Ngô Bảo Toàn", "fatherPhone": "0946058468", "motherName": "Nguyễn Thái Kim Uyên", "motherPhone": "0946958468", "phone": "0946958468", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS310": {"code": "2508276004", "gender": "Nam", "dob": "12/04/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067214001988", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Thanh Phong", "fatherPhone": "0935491533", "motherName": "Phan Thị Thảo Ly", "motherPhone": "0377327673", "phone": "0935491533", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS401": {"code": "2508276424", "gender": "Nam", "dob": "23/02/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067214003313", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Văn Thái", "fatherPhone": "0932464393", "motherName": "Nguyễn Thị Ánh Hồng", "motherPhone": "0935954488", "phone": "0935954488", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS402": {"code": "2508275984", "gender": "Nữ", "dob": "23/08/2014", "address": "Thôn Xuân Sơn, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nam Đàn - Tỉnh Nghệ An (Cũ), Xã Đại Huệ, Nghệ An", "cccd": "067314001196", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Tiến Thông", "fatherPhone": "0949223032", "motherName": "Nguyễn Thị Cẩm Tiên", "motherPhone": "", "phone": "0949223032", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS403": {"code": "2508275644", "gender": "Nam", "dob": "05/02/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067214006598", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Đặng Thái Linh", "fatherPhone": "0795566230", "motherName": "Phan Thị Mỹ Huệ", "motherPhone": "0935947674", "phone": "0795566230", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS404": {"code": "2508275704", "gender": "Nữ", "dob": "17/02/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hưng Nguyên - Tỉnh Nghệ An (Cũ), Xã Yên Trung, Nghệ An", "cccd": "067314002703", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trần Đức Nhiên", "fatherPhone": "0901998328", "motherName": "Nguyễn Thị Đường", "motherPhone": "0762535239", "phone": "0901998328", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS405": {"code": "2508276084", "gender": "Nữ", "dob": "21/07/2014", "address": "Thôn Sơn Hà, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067314007169", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Ngô Văn Hương", "fatherPhone": "0937644123", "motherName": "Nguyễn Thị Hà", "motherPhone": "0366048849", "phone": "0366048849", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS406": {"code": "2508276344", "gender": "Nữ", "dob": "08/04/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Yên Thành - Tỉnh Nghệ An (Cũ), Xã Quan Thành, Nghệ An", "cccd": "067314009270", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Trần Danh Thành", "fatherPhone": "0396549659", "motherName": "Phan Thị Ái", "motherPhone": "0963664503", "phone": "0963664503", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS407": {"code": "2508276464", "gender": "Nữ", "dob": "18/08/2014", "address": "Thôn Đức Đoài, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Nghi Lộc, Nghệ An", "cccd": "067314007423", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Duy Trực", "fatherPhone": "0989366513", "motherName": "Ngô Thị Nguyệt Ánh", "motherPhone": "0973930789", "phone": "0973930789", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS408": {"code": "2508275884", "gender": "Nữ", "dob": "30/10/2014", "address": "Thôn Vinh Đức, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Đại Huệ, Tỉnh Nghệ An (Cũ), Xã Đại Huệ, Nghệ An", "cccd": "067314006018", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Nguyễn Đình Phú", "fatherPhone": "0963067973", "motherName": "Trương Anh Túc", "motherPhone": "0914539176", "phone": "0963067973", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS409": {"code": "2508275764", "gender": "Nữ", "dob": "13/06/2014", "address": "Thôn Mỹ Hoà, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Phúc Lộc, Nghệ An", "cccd": "040314004464", "cccdDate": "", "ethnicity": "Kinh", "religion": "Không", "circumstance": "", "fatherName": "Nguyễn Đình Hòa", "fatherPhone": "0908041234", "motherName": "Dương Thị Sen", "motherPhone": "0399094404", "phone": "0908041234", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS410": {"code": "2508276124", "gender": "Nữ", "dob": "25/03/2014", "address": "Thôn Kẻ Đọng, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Hương Sơn, Tỉnh Hà Tĩnh (Cũ), Xã Sơn Tiến, Hà Tĩnh", "cccd": "067314001601", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Lê Minh Hải", "fatherPhone": "0906404541", "motherName": "Nguyễn Thị Thanh Thủy", "motherPhone": "0826227593", "phone": "0826227593", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS411": {"code": "2508276244", "gender": "Nam", "dob": "17/03/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Nông (Theo GKS), Xã Đức Lập, Lâm Đồng", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067214004122", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Phạm Công Thoại", "fatherPhone": "0975156561", "motherName": "Nguyễn Thị Thùy Trinh", "motherPhone": "0933352124", "phone": "0933352124", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}, "HS412": {"code": "2508276304", "gender": "Nam", "dob": "11/01/2014", "address": "Thôn Đức Minh, Xã Đức Lập, Lâm Đồng", "birthPlace": "Tỉnh Đắk Lắk (Theo GKS), Phường Buôn Ma Thuột, Đắk Lắk", "hometown": "Huyện Nghi Lộc, Tỉnh Nghệ An (Cũ), Xã Thần Lĩnh, Nghệ An", "cccd": "067214006481", "cccdDate": "", "ethnicity": "Kinh", "religion": "Công giáo", "circumstance": "", "fatherName": "Hà Thanh Tùng", "fatherPhone": "0908747454", "motherName": "Hồ Đỗ Quyên", "motherPhone": "0932408206", "phone": "0932408206", "photo": "", "health": {"bloodType": "", "height": "", "weight": "", "allergy": "", "chronic": "", "notes": ""}}};
+  Object.keys(def).forEach(id => {
+    if (!studentProfiles[id]) studentProfiles[id] = def[id];
+    else {
+      const d = def[id], p = studentProfiles[id];
+      Object.keys(d).forEach(k => { if (p[k] === undefined || p[k] === null) p[k] = d[k]; });
+      if (!p.health) p.health = d.health || {};
+    }
+  });
+})();
+let siEditMode = false;
+let siActiveTab = 'info';
+let siCurrentId = null;
+
 let baobaiDone = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'baobaiDone')) || {}; // {baobaiId: [studentIds]}
+const defaultSubjectTeachers = [
+  { name: 'Đặng Thị Hồng Ân', subject: 'Toán' },
+  { name: 'Phạm Thị Kim Liên', subject: 'LSĐL' },
+  { name: 'Bùi Trâm', subject: 'KHTN' },
+  { name: 'Đinh Thị Kim Phượng', subject: 'Tin' },
+  { name: 'Cao Thị Hồng', subject: 'Văn' },
+  { name: 'Nguyễn Thị Bảo Tuyền', subject: 'Ng.ngữ' },
+  { name: 'Đinh Thị Thảo', subject: 'GDCD' },
+  { name: 'Quách Minh Hưng', subject: 'C.nghệ' },
+  { name: 'Nguyễn Minh Hoạt', subject: 'GDTC' },
+  { name: 'Hoàng Viết Quang', subject: 'Nghệ thuật' },
+  { name: '', subject: 'NDGDCĐP' },
+  { name: 'Quách Minh Hưng', subject: 'HĐTNHN' }
+];
+let subjectTeachers = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'teachers')) || defaultSubjectTeachers.map(t => ({ ...t }));
+let classCommittee = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'committee')) || {
+  loptruong: '',
+  loppho_ht: '',
+  loppho_ld: '',
+  totruong1: '',
+  totruong2: '',
+  totruong3: '',
+  totruong4: ''
+};
+let thongTinView = 'sodo';
 
 // seatingMap: 6 hàng × 8 chỗ = 48. Bố cục mỗi hàng: 2 chỗ | lối đi | 4 chỗ | lối đi | 2 chỗ
 const SEAT_ROWS = 6;
@@ -1613,6 +1819,19 @@ function initFirebase() {
       if (d.schoolEvents) schoolEvents = d.schoolEvents;
       if (d.baobaiDone) baobaiDone = d.baobaiDone;
       if (d.schoolStartISO) { schoolStartISO = d.schoolStartISO; rebuildSchoolWeeks(); }
+      if (d.subjectTeachers) subjectTeachers = d.subjectTeachers;
+      if (d.classCommittee) classCommittee = d.classCommittee;
+      if (d.studentProfiles) {
+        Object.keys(d.studentProfiles).forEach(id => {
+          const remote = d.studentProfiles[id];
+          if (!studentProfiles[id]) studentProfiles[id] = remote;
+          else {
+            const photo = studentProfiles[id].photo;
+            studentProfiles[id] = { ...studentProfiles[id], ...remote };
+            if (photo) studentProfiles[id].photo = photo;
+          }
+        });
+      }
       cleanOldLogs();
       saveStorage(false);
       refreshAllViews();
@@ -1647,11 +1866,22 @@ async function saveStorage(syncToCloud = true) {
   localStorage.setItem(STORAGE_PREFIX + 'events', JSON.stringify(schoolEvents));
   localStorage.setItem(STORAGE_PREFIX + 'baobaiDone', JSON.stringify(baobaiDone));
   localStorage.setItem(STORAGE_PREFIX + 'schoolStart', schoolStartISO);
+  localStorage.setItem(STORAGE_PREFIX + 'teachers', JSON.stringify(subjectTeachers));
+  localStorage.setItem(STORAGE_PREFIX + 'committee', JSON.stringify(classCommittee));
+  localStorage.setItem(STORAGE_PREFIX + 'profiles', JSON.stringify(studentProfiles));
   if (syncToCloud && firebaseDb) {
     try {
+      // Ảnh học sinh lưu local; đồng bộ cloud không gửi photo để tránh quá dung lượng
+      const profilesCloud = {};
+      Object.keys(studentProfiles).forEach(id => {
+        const p = { ...studentProfiles[id] };
+        delete p.photo;
+        profilesCloud[id] = p;
+      });
       await firebaseDb.ref(FB_DATA_KEY).set({
         students, officers, rules, scores, baobaiList, taiLieuList, tkbData, messages, activityLog, seatingMap,
         attendance, leaveRequests, announcements, grades, studentNotes, schoolEvents, baobaiDone, schoolStartISO,
+        subjectTeachers, classCommittee, studentProfiles: profilesCloud,
         updatedAt: Date.now()
       });
     } catch (err) { console.warn("Firebase write error:", err); }
@@ -1709,6 +1939,19 @@ function forceSyncWithCloud() {
     if (d.schoolEvents) schoolEvents = d.schoolEvents;
     if (d.baobaiDone) baobaiDone = d.baobaiDone;
     if (d.schoolStartISO) { schoolStartISO = d.schoolStartISO; rebuildSchoolWeeks(); }
+    if (d.subjectTeachers) subjectTeachers = d.subjectTeachers;
+    if (d.classCommittee) classCommittee = d.classCommittee;
+    if (d.studentProfiles) {
+      Object.keys(d.studentProfiles).forEach(id => {
+        const remote = d.studentProfiles[id];
+        if (!studentProfiles[id]) studentProfiles[id] = remote;
+        else {
+          const photo = studentProfiles[id].photo;
+          studentProfiles[id] = { ...studentProfiles[id], ...remote };
+          if (photo) studentProfiles[id].photo = photo;
+        }
+      });
+    }
     cleanOldLogs();
     saveStorage(false);
     refreshAllViews();
@@ -1795,6 +2038,7 @@ function startSession() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('appScreen').classList.remove('hidden');
   document.getElementById('userBadge').classList.remove('hidden');
+  document.getElementById('btnStudentInfo')?.classList.remove('hidden');
   document.getElementById('mainNav').classList.remove('hidden');
 
   selectedWeek = getLiveCurrentWeek();
@@ -1879,6 +2123,8 @@ function startSession() {
     renderGvcnConfig();
     renderActivityLog();
   }
+  updateNavBadges();
+  setTimeout(checkForceChangePin, 400);
 }
 
 function logout() {
@@ -1890,6 +2136,7 @@ function logout() {
   document.getElementById('loginScreen').classList.remove('hidden');
   document.getElementById('appScreen').classList.add('hidden');
   document.getElementById('userBadge').classList.add('hidden');
+  document.getElementById('btnStudentInfo')?.classList.add('hidden');
   document.getElementById('mainNav').classList.add('hidden');
   document.getElementById('loginHsPin').value = '';
   document.getElementById('loginCbPin').value = '';
@@ -1918,7 +2165,7 @@ function switchTab(tabId) {
     if (btnBb) btnBb.classList.toggle('hidden', !isOfficer);
     if (btnTl) btnTl.classList.toggle('hidden', !isOfficer);
   }
-  if (tabId === 'tab-sodo') renderSeatingChart();
+  if (tabId === 'tab-thongtin') setThongTinView(thongTinView || 'sodo');
   if (tabId === 'tab-tinnhan') renderMessages();
 }
 
@@ -1961,7 +2208,61 @@ function renderPhOverview() {
       </div>`;
     }).join('');
   }
+  renderPhAttendanceAlerts(st.id);
   renderBaobaiHome();
+}
+
+/** Thông báo điểm danh cho phụ huynh: vắng / muộn / nghỉ phép */
+function renderPhAttendanceAlerts(studentId) {
+  const box = document.getElementById('phAttendanceAlerts');
+  if (!box) return;
+  const cutoff = Date.now() - 21 * 24 * 60 * 60 * 1000; // 21 ngày gần đây
+  const mine = (attendance || []).filter(a => {
+    if (a.studentId !== studentId) return false;
+    if (a.status === 'present') return false;
+    const t = a.date ? new Date(a.date + 'T12:00:00').getTime() : 0;
+    return t >= cutoff;
+  }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  if (!mine.length) {
+    box.classList.add('hidden');
+    box.innerHTML = '';
+    return;
+  }
+  box.classList.remove('hidden');
+  const sessLabel = (s) => s === 'afternoon' ? 'Buổi chiều' : 'Buổi sáng';
+  const statusMeta = {
+    absent: { label: 'Nghỉ không phép', icon: 'fa-circle-xmark', cls: 'bg-red-100 border-red-400 text-red-900 ring-2 ring-red-300', badge: 'bg-red-600 text-white' },
+    excused: { label: 'Nghỉ có phép', icon: 'fa-file-circle-check', cls: 'bg-amber-50 border-amber-300 text-amber-900', badge: 'bg-amber-500 text-white' },
+    late: { label: 'Đi muộn', icon: 'fa-clock', cls: 'bg-orange-50 border-orange-300 text-orange-900', badge: 'bg-orange-500 text-white' }
+  };
+  box.innerHTML =
+    '<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">' +
+    '<div class="flex items-center justify-between border-b pb-2">' +
+    '<h4 class="font-bold text-xs md:text-sm text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-clipboard-user text-indigo-600"></i> Thông báo điểm danh</h4>' +
+    '<span class="text-[10px] text-slate-400">' + mine.length + ' buổi gần đây</span></div>' +
+    mine.map(a => {
+      const m = statusMeta[a.status] || statusMeta.excused;
+      const isAbsent = a.status === 'absent';
+      return '<div class="p-3 rounded-xl border flex items-start gap-2 text-xs ' + m.cls + (isAbsent ? ' animate-pulse' : '') + '">' +
+        '<i class="fa-solid ' + m.icon + ' text-base mt-0.5"></i>' +
+        '<div class="flex-1">' +
+        '<div class="flex flex-wrap items-center gap-1.5 mb-0.5">' +
+        '<span class="font-bold text-sm">' + m.label + '</span>' +
+        '<span class="text-[10px] px-1.5 py-0.5 rounded-full font-bold ' + m.badge + '">' + (isAbsent ? 'Cần lưu ý' : 'Thông báo') + '</span></div>' +
+        '<div class="font-medium">Ngày ' + formatAttDate(a.date) + ' · ' + sessLabel(a.session) + '</div>' +
+        (a.by ? '<div class="text-[10px] opacity-80 mt-0.5">Ghi nhận bởi: ' + a.by + '</div>' : '') +
+        (isAbsent ? '<div class="text-[11px] font-semibold mt-1">Em bị ghi nhận nghỉ học không phép. Phụ huynh vui lòng liên hệ giáo viên chủ nhiệm nếu có lý do.</div>' : '') +
+        '</div></div>';
+    }).join('') +
+    '</div>';
+}
+
+function formatAttDate(iso) {
+  if (!iso) return '';
+  const p = iso.split('-');
+  if (p.length === 3) return p[2] + '/' + p[1] + '/' + p[0];
+  return iso;
 }
 
 function renderBaobaiHome() {
@@ -2404,15 +2705,47 @@ function setTkbSession(session) {
 
 function renderTkb() {
   const list = activeTkbSession === 'morning' ? tkbData.morning : tkbData.afternoon;
-  document.getElementById('tkbBody').innerHTML = list.map(row => `
-    <tr class="hover:bg-slate-50 transition">
-      <td class="p-2.5 font-bold bg-slate-50 border-r text-indigo-700">Tiết ${row.period}</td>
-      <td class="p-2.5 border-r ${row.mon === 'Nghỉ' ? 'text-slate-300 italic' : 'font-medium'}">${row.mon}</td>
-      <td class="p-2.5 border-r ${row.tue === 'Nghỉ' ? 'text-slate-300 italic' : 'font-medium'}">${row.tue}</td>
-      <td class="p-2.5 border-r ${row.wed === 'Nghỉ' ? 'text-slate-300 italic' : 'font-medium'}">${row.wed}</td>
-      <td class="p-2.5 border-r ${row.thu === 'Nghỉ' ? 'text-slate-300 italic' : 'font-medium'}">${row.thu}</td>
-      <td class="p-2.5 ${row.fri === 'Nghỉ' ? 'text-slate-300 italic' : 'font-medium'}">${row.fri}</td>
-    </tr>`).join('');
+  // JS getDay(): 0 CN, 1 T2 ... 5 T6, 6 T7
+  const dow = new Date().getDay();
+  const dayKeys = ['', 'mon', 'tue', 'wed', 'thu', 'fri'];
+  const dayLabels = ['', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu'];
+  const isSchoolDay = dow >= 1 && dow <= 5;
+
+  // Highlight header
+  const thead = document.querySelector('#tkbTable thead tr');
+  if (thead) {
+    const ths = thead.querySelectorAll('th');
+    ths.forEach((th, i) => {
+      th.classList.remove('tkb-today-head');
+      if (isSchoolDay && i === dow) th.classList.add('tkb-today-head');
+    });
+  }
+
+  const note = document.getElementById('tkbTodayNote');
+  if (note) {
+    if (isSchoolDay) {
+      note.innerHTML = '<i class="fa-solid fa-sun text-amber-500 mr-1"></i> Hôm nay: <b>' + dayLabels[dow] + '</b> — cột đang sáng';
+      note.classList.remove('hidden');
+    } else {
+      note.innerHTML = '<i class="fa-regular fa-calendar mr-1"></i> Hôm nay cuối tuần — không có tiết trên TKB (Thứ 2–6)';
+      note.classList.remove('hidden');
+    }
+  }
+
+  document.getElementById('tkbBody').innerHTML = list.map(row => {
+    const cells = dayKeys.slice(1).map((key, idx) => {
+      const dayNum = idx + 1;
+      const val = row[key];
+      const isNghi = val === 'Nghỉ';
+      const isToday = isSchoolDay && dayNum === dow;
+      let cls = 'p-2.5 border-r ';
+      if (isToday) cls += 'tkb-today-cell ';
+      cls += isNghi ? 'text-slate-300 italic' : 'font-medium';
+      if (dayNum === 5) cls = cls.replace('border-r ', '');
+      return '<td class="' + cls + '">' + val + '</td>';
+    }).join('');
+    return '<tr class="hover:bg-slate-50 transition"><td class="p-2.5 font-bold bg-slate-50 border-r text-indigo-700">Tiết ' + row.period + '</td>' + cells + '</tr>';
+  }).join('');
 }
 
 function openTkbConfigModal() {
@@ -2662,14 +2995,35 @@ async function deleteTailieu(id) {
   renderTailieuList();
 }
 
-// ===== ĐỔI PIN =====
+// ===== ĐỔI MẬT KHẨU =====
+let forceChangePin = false;
+const DEFAULT_PINS = { student: '7a12026', gvcn: '0207', loptruong: '7101', loppho_ht: '7102', loppho_ld: '7103', totruong1: '7111', totruong2: '7112', totruong3: '7113', totruong4: '7114' };
+
+function isUsingDefaultPin() {
+  if (!currentUser) return false;
+  if (currentUser.type === 'ph') return currentUser.student.pin === DEFAULT_PINS.student;
+  const key = currentUser.officer.id;
+  return officers[key] && officers[key].pin === (DEFAULT_PINS[key] || '');
+}
+function checkForceChangePin() {
+  if (!currentUser || !isUsingDefaultPin()) { forceChangePin = false; return; }
+  forceChangePin = true;
+  alert('Bạn đang dùng mật khẩu mặc định. Vì an toàn, hãy đổi mật khẩu ngay bây giờ.');
+  openChangePinModal();
+}
 function openChangePinModal() {
   document.getElementById('oldPinInput').value = '';
   document.getElementById('newPinInput').value = '';
   document.getElementById('confirmPinInput').value = '';
   document.getElementById('changePinModal').classList.remove('hidden');
 }
-function closeChangePinModal() { document.getElementById('changePinModal').classList.add('hidden'); }
+function closeChangePinModal() {
+  if (forceChangePin && isUsingDefaultPin()) {
+    alert('Vui lòng đổi mật khẩu mặc định trước khi tiếp tục.');
+    return;
+  }
+  document.getElementById('changePinModal').classList.add('hidden');
+}
 
 async function submitChangePin(e) {
   e.preventDefault();
@@ -2678,6 +3032,7 @@ async function submitChangePin(e) {
   const confirmPin = document.getElementById('confirmPinInput').value.trim();
   if (newPin.length < 4) return alert("Mật khẩu mới phải có ít nhất 4 ký tự!");
   if (newPin !== confirmPin) return alert("Xác nhận mật khẩu mới không khớp!");
+  if (isUsingDefaultPin() && newPin === oldPin) return alert("Mật khẩu mới phải khác mật khẩu mặc định!");
 
   if (currentUser.type === 'ph') {
     if (currentUser.student.pin !== oldPin) return alert("Mật khẩu hiện tại không đúng!");
@@ -2685,20 +3040,22 @@ async function submitChangePin(e) {
     if (idx !== -1) {
       students[idx].pin = newPin;
       currentUser.student.pin = newPin;
-      logActivity('Đổi mật khẩu', 'Phụ huynh đổi PIN');
+      logActivity('Đổi mật khẩu', 'Phụ huynh đổi mật khẩu');
       await saveStorage(true);
-      closeChangePinModal();
-      alert("Phụ huynh đổi mật khẩu thành công!");
+      forceChangePin = false;
+      document.getElementById('changePinModal').classList.add('hidden');
+      alert("Đổi mật khẩu thành công!");
     }
   } else {
     const offKey = currentUser.officer.id;
     if (officers[offKey].pin !== oldPin) return alert("Mật khẩu hiện tại không chính xác!");
     officers[offKey].pin = newPin;
     currentUser.officer.pin = newPin;
-    logActivity('Đổi PIN cán sự', currentUser.officer.name);
+    logActivity('Đổi mật khẩu cán sự', currentUser.officer.name);
     await saveStorage(true);
-    closeChangePinModal();
-    alert("Đã cập nhật mã PIN mới thành công!");
+    forceChangePin = false;
+    document.getElementById('changePinModal').classList.add('hidden');
+    alert("Đã cập nhật mật khẩu mới thành công!");
   }
 }
 
@@ -2970,6 +3327,91 @@ function shortName(fullName) {
   return parts[parts.length - 2] + ' ' + parts[parts.length - 1];
 }
 
+// ===== THÔNG TIN LỚP =====
+const COMMITTEE_ROLES = [
+  { key: 'loptruong', label: 'Lớp trưởng' },
+  { key: 'loppho_ht', label: 'Lớp phó học tập' },
+  { key: 'loppho_ld', label: 'Lớp phó lao động' },
+  { key: 'totruong1', label: 'Tổ trưởng Tổ 1' },
+  { key: 'totruong2', label: 'Tổ trưởng Tổ 2' },
+  { key: 'totruong3', label: 'Tổ trưởng Tổ 3' },
+  { key: 'totruong4', label: 'Tổ trưởng Tổ 4' }
+];
+
+function setThongTinView(view) {
+  thongTinView = view;
+  document.getElementById('ttViewSodo')?.classList.toggle('hidden', view !== 'sodo');
+  document.getElementById('ttViewCommittee')?.classList.toggle('hidden', view !== 'committee');
+  document.getElementById('ttViewTeachers')?.classList.toggle('hidden', view !== 'teachers');
+  const btnCls = (active) => 'flex-1 min-w-[5.5rem] py-2.5 px-2 rounded-xl text-xs font-bold ' + (active ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-slate-500 hover:bg-slate-50');
+  const bSodo = document.getElementById('btnTtSodo');
+  const bCommittee = document.getElementById('btnTtCommittee');
+  const bTeachers = document.getElementById('btnTtTeachers');
+  if (bSodo) bSodo.className = btnCls(view === 'sodo');
+  if (bCommittee) bCommittee.className = btnCls(view === 'committee');
+  if (bTeachers) bTeachers.className = btnCls(view === 'teachers');
+  if (view === 'sodo') renderSeatingChart();
+  if (view === 'committee') renderCommitteeOnly();
+  if (view === 'teachers') renderTeachersOnly();
+}
+
+function renderCommitteeOnly() {
+  const isGvcn = currentUser?.type === 'officer' && currentUser.officer.role === 'gvcn';
+  document.getElementById('btnSaveCommittee')?.classList.toggle('hidden', !isGvcn);
+  const cbody = document.getElementById('committeeTable');
+  if (!cbody) return;
+  cbody.innerHTML = COMMITTEE_ROLES.map(r => {
+    const name = classCommittee[r.key] || '';
+    if (isGvcn) {
+      return '<tr><td class="p-2.5 font-semibold text-slate-700">' + r.label + '</td>' +
+        '<td class="p-2"><input type="text" data-committee="' + r.key + '" value="' + name.replace(/"/g, '&quot;') + '" placeholder="Nhập họ và tên..." class="w-full p-2 border rounded-lg text-sm"></td></tr>';
+    }
+    return '<tr><td class="p-2.5 font-semibold text-slate-700">' + r.label + '</td>' +
+      '<td class="p-2.5 font-medium text-slate-800">' + (name || '<span class="text-slate-400 italic">Chưa cập nhật</span>') + '</td></tr>';
+  }).join('');
+}
+
+function renderTeachersOnly() {
+  const isGvcn = currentUser?.type === 'officer' && currentUser.officer.role === 'gvcn';
+  document.getElementById('btnSaveTeachers')?.classList.toggle('hidden', !isGvcn);
+  const tbody = document.getElementById('subjectTeachersTable');
+  if (!tbody) return;
+  tbody.innerHTML = subjectTeachers.map((t, i) => {
+    if (isGvcn) {
+      return '<tr><td class="p-2 text-center text-slate-500">' + (i + 1) + '</td>' +
+        '<td class="p-2"><input type="text" data-tname="' + i + '" value="' + (t.name || '').replace(/"/g, '&quot;') + '" placeholder="Họ và tên giáo viên..." class="w-full p-2 border rounded-lg text-sm"></td>' +
+        '<td class="p-2"><input type="text" data-tsubj="' + i + '" value="' + (t.subject || '').replace(/"/g, '&quot;') + '" class="w-full p-2 border rounded-lg text-sm font-semibold text-indigo-700"></td></tr>';
+    }
+    return '<tr><td class="p-2 text-center text-slate-500">' + (i + 1) + '</td>' +
+      '<td class="p-2.5 font-medium">' + (t.name || '<span class="text-slate-400 italic">—</span>') + '</td>' +
+      '<td class="p-2.5 font-semibold text-indigo-700">' + (t.subject || '') + '</td></tr>';
+  }).join('');
+}
+
+async function saveCommitteeNames() {
+  COMMITTEE_ROLES.forEach(r => {
+    const inp = document.querySelector('input[data-committee="' + r.key + '"]');
+    if (inp) classCommittee[r.key] = inp.value.trim();
+  });
+  logActivity('Cập nhật ban cán sự lớp', '');
+  await saveStorage(true);
+  renderCommitteeOnly();
+  alert('Đã lưu danh sách ban cán sự lớp!');
+}
+
+async function saveSubjectTeachers() {
+  subjectTeachers.forEach((t, i) => {
+    const n = document.querySelector('input[data-tname="' + i + '"]');
+    const s = document.querySelector('input[data-tsubj="' + i + '"]');
+    if (n) t.name = n.value.trim();
+    if (s) t.subject = s.value.trim();
+  });
+  logActivity('Cập nhật giáo viên bộ môn', '');
+  await saveStorage(true);
+  renderTeachersOnly();
+  alert('Đã lưu danh sách giáo viên bộ môn!');
+}
+
 /** Điểm thi đua tuần hiện tại của 1 HS */
 function getStudentWeekScore(studentId, week) {
   const recs = scores.filter(sc => sc.studentId === studentId && sc.week === week);
@@ -3177,22 +3619,101 @@ function renderAttendancePanel() {
   panel.innerHTML = html;
   renderAttMonthStats();
 }
+function weekNumberFromISO(iso) {
+  if (!iso || !schoolWeeks.length) return selectedWeek || 1;
+  const d = new Date(iso + 'T12:00:00');
+  const found = schoolWeeks.find(w => d >= w.startDate && d <= w.endDate);
+  return found ? found.week : (selectedWeek || 1);
+}
+function findMinusRule(keywords, fallbackName, fallbackPts) {
+  const list = (rules && rules.minus) || [];
+  const found = list.find(r => keywords.some(k => (r.name || '').toLowerCase().includes(k.toLowerCase())));
+  return found || { name: fallbackName, points: fallbackPts };
+}
+/** Đồng bộ điểm danh → điểm thi đua (tự trừ khi muộn / nghỉ không phép) */
+function syncAttendanceToScores(date, session) {
+  const by = currentUser?.officer?.name || 'Hệ thống điểm danh';
+  const sessText = session === 'afternoon' ? 'buổi chiều' : 'buổi sáng';
+  const week = weekNumberFromISO(date);
+  const lateRule = findMinusRule(['đi học muộn', 'muộn'], 'Đi học muộn', 2);
+  const absentRule = findMinusRule(['vắng học không phép', 'không phép'], 'Vắng học không phép', 10);
+
+  students.forEach(st => {
+    const attKey = date + '_' + session + '_' + st.id;
+    // Xóa điểm tự động cũ của buổi này (không đụng điểm chấm tay)
+    scores = scores.filter(s => !(s.source === 'attendance' && s.attKey === attKey));
+    const rec = attendance.find(a => a.date === date && a.session === session && a.studentId === st.id);
+    if (!rec) return;
+    if (rec.status === 'late') {
+      scores.push({
+        id: Date.now() + Math.random(),
+        week,
+        studentId: st.id,
+        type: 'minus',
+        points: lateRule.points || 2,
+        reason: lateRule.name + ' (tự động từ điểm danh ' + sessText + ')',
+        date,
+        recordedBy: by,
+        source: 'attendance',
+        attKey
+      });
+    } else if (rec.status === 'absent') {
+      scores.push({
+        id: Date.now() + Math.random(),
+        week,
+        studentId: st.id,
+        type: 'minus',
+        points: absentRule.points || 10,
+        reason: absentRule.name + ' (tự động từ điểm danh ' + sessText + ')',
+        date,
+        recordedBy: by,
+        source: 'attendance',
+        attKey
+      });
+    }
+    // present / excused: không trừ điểm thi đua
+  });
+}
+
 async function saveAttendanceBatch() {
   const date = document.getElementById('attDate').value;
   const session = document.getElementById('attSession').value;
   if (!date) return alert('Chọn ngày!');
+  let absentCount = 0, excusedCount = 0, lateCount = 0;
   students.forEach(st => {
     const sel = document.querySelector('input[name="att_' + st.id + '"]:checked');
     const status = sel ? sel.value : 'present';
+    if (status === 'absent') absentCount++;
+    if (status === 'excused') excusedCount++;
+    if (status === 'late') lateCount++;
     const idx = attendance.findIndex(a => a.date === date && a.session === session && a.studentId === st.id);
-    const row = { id: Date.now() + Math.random(), date, session, studentId: st.id, status, week: selectedWeek, by: currentUser?.officer?.name || '' };
-    if (idx >= 0) { attendance[idx].status = status; attendance[idx].by = row.by; }
+    const row = { id: Date.now() + Math.random(), date, session, studentId: st.id, status, week: weekNumberFromISO(date), by: currentUser?.officer?.name || '' };
+    if (idx >= 0) { attendance[idx].status = status; attendance[idx].by = row.by; attendance[idx].week = row.week; }
     else attendance.push(row);
   });
-  logActivity('Điểm danh', date + ' ' + (session === 'morning' ? 'sáng' : 'chiều'));
+  // Liên kết thi đua
+  syncAttendanceToScores(date, session);
+  logActivity('Điểm danh', date + ' ' + (session === 'morning' ? 'sáng' : 'chiều') +
+    (absentCount ? ' · KP:' + absentCount : '') +
+    (excusedCount ? ' · NP:' + excusedCount : '') +
+    (lateCount ? ' · Muộn:' + lateCount : ''));
   await saveStorage(true);
   renderAttMonthStats();
-  alert('Đã lưu điểm danh!');
+  try { renderScoreboard(); } catch (e) {}
+  try { updateNavBadges(); } catch (e) {}
+  let msg = 'Đã lưu điểm danh!';
+  if (absentCount || lateCount) {
+    const lateRule = findMinusRule(['đi học muộn', 'muộn'], 'Đi học muộn', 2);
+    const absentRule = findMinusRule(['vắng học không phép', 'không phép'], 'Vắng học không phép', 10);
+    msg += '\n\nĐã tự cập nhật điểm thi đua:';
+    if (lateCount) msg += '\n• Đi muộn: −' + (lateRule.points || 2) + 'đ × ' + lateCount + ' học sinh';
+    if (absentCount) msg += '\n• Nghỉ không phép: −' + (absentRule.points || 10) + 'đ × ' + absentCount + ' học sinh';
+  }
+  if (excusedCount) msg += '\n• Nghỉ có phép: ' + excusedCount + ' (không trừ điểm thi đua)';
+  if (absentCount || excusedCount || lateCount) {
+    msg += '\n\nThông báo đã gửi tới tài khoản phụ huynh/học sinh.';
+  }
+  alert(msg);
 }
 function renderAttMonthStats() {
   const el = document.getElementById('attMonthStats');
@@ -3267,14 +3788,17 @@ async function decideLeave(id, status) {
     const sessions = l.session === 'both' ? ['morning','afternoon'] : [l.session];
     sessions.forEach(sess => {
       const idx = attendance.findIndex(a => a.date === l.date && a.session === sess && a.studentId === l.studentId);
-      const row = { id: Date.now()+Math.random(), date: l.date, session: sess, studentId: l.studentId, status: 'excused', week: selectedWeek, by: 'GVCN (xin nghỉ)' };
-      if (idx >= 0) attendance[idx].status = 'excused';
+      const row = { id: Date.now()+Math.random(), date: l.date, session: sess, studentId: l.studentId, status: 'excused', week: weekNumberFromISO(l.date), by: 'GVCN (xin nghỉ)' };
+      if (idx >= 0) { attendance[idx].status = 'excused'; attendance[idx].by = row.by; attendance[idx].week = row.week; }
       else attendance.push(row);
+      // Gỡ điểm trừ tự động nếu trước đó đã ghi nghỉ không phép
+      syncAttendanceToScores(l.date, sess);
     });
   }
   logActivity(status === 'approved' ? 'Duyệt xin nghỉ' : 'Từ chối xin nghỉ', l.studentName + ' ' + l.date);
   await saveStorage(true);
   renderLeaveLists();
+  try { renderScoreboard(); } catch (e) {}
 }
 
 // ===== THÔNG BÁO =====
@@ -3462,6 +3986,123 @@ function showWeekReport() {
   w.document.close();
 }
 
+function openHelpGuide() {
+  document.getElementById('helpGuideModal')?.classList.remove('hidden');
+}
+function closeHelpGuide() {
+  document.getElementById('helpGuideModal')?.classList.add('hidden');
+}
+
+function setBadge(id, count) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (count > 0) {
+    el.textContent = count > 9 ? '9+' : String(count);
+    el.classList.remove('hidden');
+  } else el.classList.add('hidden');
+}
+
+function updateNavBadges() {
+  if (!currentUser) return;
+  // Báo bài còn hạn chưa đánh dấu (PH) hoặc còn hạn (cán bộ)
+  let bb = 0;
+  const now = Date.now();
+  (baobaiList || []).forEach(b => {
+    const exp = b.expireAt || b.deadline || 0;
+    if (exp && exp < now) return;
+    if (currentUser.type === 'ph') {
+      const done = (baobaiDone[b.id] || []).includes(currentUser.student.id);
+      if (!done) bb++;
+    } else bb++;
+  });
+  setBadge('badgeBaobai', Math.min(bb, 99));
+
+  // Thông báo chưa đọc
+  let tb = 0;
+  const uid = currentUser.type === 'ph' ? currentUser.student.id : (currentUser.officer?.id || '');
+  (announcements || []).forEach(a => {
+    if (!(a.reads || []).includes(uid)) tb++;
+  });
+  setBadge('badgeThongbao', Math.min(tb, 99));
+
+  // Tin nhắn: PH chờ phản hồi / GVCN tin chưa trả lời
+  let tn = 0;
+  if (currentUser.type === 'ph') {
+    tn = (messages || []).filter(m => m.studentId === currentUser.student.id && (!m.replies || !m.replies.length)).length;
+  } else if (currentUser.officer?.role === 'gvcn') {
+    tn = (messages || []).filter(m => !m.replies || !m.replies.length).length;
+  }
+  const ub = document.getElementById('unreadBadge');
+  if (ub) ub.classList.toggle('hidden', tn === 0);
+
+  // Tổng quan con: số buổi nghỉ không phép / vắng gần đây
+  if (currentUser.type === 'ph') {
+    const cutoff = Date.now() - 21 * 24 * 60 * 60 * 1000;
+    const abs = (attendance || []).filter(a => {
+      if (a.studentId !== currentUser.student.id) return false;
+      if (a.status !== 'absent' && a.status !== 'excused' && a.status !== 'late') return false;
+      const t = a.date ? new Date(a.date + 'T12:00:00').getTime() : 0;
+      return t >= cutoff;
+    });
+    const kp = abs.filter(a => a.status === 'absent').length;
+    setBadge('badgePhOverview', kp > 0 ? kp : abs.length);
+    const badge = document.getElementById('badgePhOverview');
+    if (badge && !badge.classList.contains('hidden')) {
+      badge.className = 'absolute top-0.5 right-1 min-w-[1rem] h-4 px-1 rounded-full text-white text-[9px] font-bold leading-4 text-center ' +
+        (kp > 0 ? 'bg-red-600' : 'bg-amber-500');
+    }
+  } else {
+    setBadge('badgePhOverview', 0);
+  }
+}
+
+function buildMonthReport() {
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth() + 1;
+  const ym = y + '-' + String(m).padStart(2, '0');
+  const weeks = (typeof getWeeksForMonth === 'function') ? getWeeksForMonth(ym) : [];
+  let lines = [];
+  lines.push('BÁO CÁO THÁNG ' + m + '/' + y + ' — LỚP 7A1');
+  lines.push('THCS Chu Văn An · Xã Đức Lập · Lâm Đồng');
+  lines.push('Tuần trong tháng: ' + (weeks.length ? weeks.map(w => 'T' + w).join(', ') : 'Không có'));
+  lines.push('');
+  // Chuyên cần
+  const monthAtt = (attendance || []).filter(a => a.date && a.date.startsWith(ym));
+  const byStatus = {};
+  monthAtt.forEach(a => { byStatus[a.status] = (byStatus[a.status] || 0) + 1; });
+  lines.push('=== CHUYÊN CẦN ===');
+  lines.push('Tổng bản ghi: ' + monthAtt.length);
+  Object.keys(byStatus).forEach(k => lines.push('  - ' + k + ': ' + byStatus[k]));
+  const leaves = (leaveRequests || []).filter(l => l.date && l.date.startsWith(ym));
+  lines.push('Đơn xin nghỉ trong tháng: ' + leaves.length + ' (chờ duyệt: ' + leaves.filter(l => l.status === 'pending').length + ')');
+  lines.push('');
+  // Thi đua TB
+  lines.push('=== THI ĐUA (điểm TB các tuần trong tháng) ===');
+  const ranked = students.map(st => {
+    const avg = (typeof getAvgForWeeks === 'function') ? getAvgForWeeks(st.id, weeks).avg : 100;
+    return { name: st.name, group: st.group, avg };
+  }).sort((a, b) => b.avg - a.avg);
+  ranked.slice(0, 15).forEach((r, i) => lines.push((i + 1) + '. ' + r.name + ' (' + r.group + '): ' + r.avg));
+  if (ranked.length > 15) lines.push('... và ' + (ranked.length - 15) + ' học sinh khác');
+  lines.push('');
+  // Tin nhắn
+  lines.push('=== TIN NHẮN ===');
+  const pendingMsg = (messages || []).filter(m => !m.replies || !m.replies.length);
+  lines.push('Tin chưa phản hồi: ' + pendingMsg.length);
+  pendingMsg.slice(0, 10).forEach(m => lines.push('  - ' + (m.studentName || m.studentId) + ': ' + String(m.content || '').slice(0, 60)));
+  lines.push('');
+  lines.push('Lập lúc: ' + now.toLocaleString('vi-VN'));
+  return lines.join('\n');
+}
+
+function showMonthReport() {
+  const text = buildMonthReport();
+  const w = window.open('', '_blank');
+  w.document.write('<pre style="font-family:sans-serif;padding:20px;white-space:pre-wrap">' + text.replace(/</g,'&lt;') + '</pre><p><button onclick="window.print()">In / Lưu PDF</button></p>');
+  w.document.close();
+  logActivity('Xuất báo cáo tháng', '');
+}
+
 // ===== GHI CHÚ HS =====
 async function editStudentNote(studentId) {
   const st = students.find(s => s.id === studentId);
@@ -3583,9 +4224,262 @@ async function saveSchoolStartDate() {
       '<div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">' +
       rows.map((r,i) => '<div class="p-2.5 rounded-xl border ' + (i===0?'bg-amber-50 border-amber-300':'bg-slate-50') + '"><div class="font-bold">' + (i+1) + '. ' + r.g +
         '</div><div class="text-indigo-700 font-extrabold text-sm">' + r.avg.toFixed(1) + 'đ</div><div class="text-slate-400">' + r.n + ' HS</div></div>').join('') +
-      '</div><div class="mt-3"><button onclick="showWeekReport()" class="px-3 py-1.5 bg-slate-800 text-white text-[11px] font-bold rounded-lg">Xuất báo cáo tuần</button></div>';
+      '</div><div class="mt-3 flex flex-wrap gap-2">' +
+      '<button onclick="showWeekReport()" class="px-3 py-1.5 bg-slate-800 text-white text-[11px] font-bold rounded-lg">Xuất báo cáo tuần</button>' +
+      '<button onclick="showMonthReport()" class="px-3 py-1.5 bg-emerald-700 text-white text-[11px] font-bold rounded-lg">Xuất báo cáo tháng</button></div>';
   };
+  try {
+    const _oldSwitch = switchTab;
+    switchTab = function(tabId) {
+      _oldSwitch(tabId);
+      try { updateNavBadges(); } catch (e) {}
+    };
+  } catch (e) {}
 })();
+
+// ===== THÔNG TIN HỌC SINH =====
+function emptyProfile() {
+  return { gender:'', dob:'', address:'', birthPlace:'', hometown:'', cccd:'', cccdDate:'', ethnicity:'', religion:'', circumstance:'', fatherName:'', fatherPhone:'', motherName:'', motherPhone:'', phone:'', photo:'', health:{ height:'', weight:'', eye:'Không', bloodType:'', allergy:'', chronic:'', notes:'' } };
+}
+function getProfile(id) {
+  if (!studentProfiles[id]) studentProfiles[id] = emptyProfile();
+  if (!studentProfiles[id].health) studentProfiles[id].health = { height:'', weight:'', eye:'Không', bloodType:'', allergy:'', chronic:'', notes:'' };
+  if (studentProfiles[id].health.eye === undefined) studentProfiles[id].health.eye = 'Không';
+  return studentProfiles[id];
+}
+function canEditStudentInfo(studentId) {
+  if (!currentUser) return false;
+  if (currentUser.type === 'officer' && currentUser.officer.role === 'gvcn') return true;
+  if (currentUser.type === 'ph' && currentUser.student.id === studentId) return true;
+  return false;
+}
+function openStudentInfoModal() {
+  if (!currentUser) { alert('Vui lòng đăng nhập để xem thông tin học sinh.'); return; }
+  siEditMode = false;
+  siActiveTab = 'info';
+  const sel = document.getElementById('siStudentSelect');
+  const wrap = document.getElementById('siSelectWrap');
+  if (currentUser.type === 'ph') {
+    wrap.classList.add('hidden');
+    siCurrentId = currentUser.student.id;
+  } else {
+    wrap.classList.remove('hidden');
+    sel.innerHTML = students.map(s => '<option value="' + s.id + '">' + s.name + ' (' + s.group + ')</option>').join('');
+    siCurrentId = sel.value || students[0]?.id;
+  }
+  document.getElementById('studentInfoModal').classList.remove('hidden');
+  setSiTab('info');
+  renderStudentInfoBody();
+}
+function closeStudentInfoModal() {
+  document.getElementById('studentInfoModal').classList.add('hidden');
+  siEditMode = false;
+}
+function onSiStudentChange() {
+  siCurrentId = document.getElementById('siStudentSelect').value;
+  siEditMode = false;
+  renderStudentInfoBody();
+}
+function setSiTab(tab) {
+  siActiveTab = tab;
+  const bi = document.getElementById('btnSiTabInfo');
+  const bh = document.getElementById('btnSiTabHealth');
+  if (bi) bi.className = 'flex-1 py-2 rounded-xl text-xs font-bold ' + (tab === 'info' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50');
+  if (bh) bh.className = 'flex-1 py-2 rounded-xl text-xs font-bold ' + (tab === 'health' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50');
+  renderStudentInfoBody();
+}
+function toggleSiEdit() {
+  if (!canEditStudentInfo(siCurrentId)) return;
+  siEditMode = true;
+  renderStudentInfoBody();
+}
+function fieldRow(label, key, val, edit) {
+  if (edit) {
+    return '<div class="mb-2.5"><label class="block text-[11px] font-bold text-slate-500 mb-0.5">' + label + '</label>' +
+      '<input type="text" data-si="' + key + '" value="' + String(val || '').replace(/"/g, '&quot;') + '" class="w-full p-2 border rounded-lg text-sm"></div>';
+  }
+  return '<div class="flex gap-2 py-1.5 border-b border-slate-100 text-sm"><span class="w-36 shrink-0 text-slate-500 text-xs font-semibold">' + label + '</span><span class="font-medium text-slate-800 flex-1">' + (val || '<span class="text-slate-300 italic">Chưa có</span>') + '</span></div>';
+}
+function renderStudentInfoBody() {
+  const body = document.getElementById('siBody');
+  if (!body || !siCurrentId) return;
+  const st = students.find(s => s.id === siCurrentId);
+  const p = getProfile(siCurrentId);
+  const canEdit = canEditStudentInfo(siCurrentId);
+  const edit = siEditMode && canEdit;
+  document.getElementById('btnSiEdit')?.classList.toggle('hidden', !canEdit || siEditMode);
+  document.getElementById('btnSiSave')?.classList.toggle('hidden', !edit);
+
+  if (siActiveTab === 'info') {
+    const photoHtml = '<div class="flex flex-col items-center mb-4">' +
+      (p.photo
+        ? '<img src="' + p.photo + '" alt="Ảnh học sinh" class="w-28 h-28 rounded-2xl object-cover border-2 border-sky-200 shadow">'
+        : '<div class="w-28 h-28 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400"><i class="fa-solid fa-user text-3xl"></i></div>') +
+      (edit ? '<label class="mt-2 text-xs font-bold text-sky-700 cursor-pointer bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-lg"><i class="fa-solid fa-camera mr-1"></i>Tải ảnh lên (tự nén ~200KB)<input type="file" accept="image/*" class="hidden" onchange="onStudentPhotoSelected(event)"></label><p class="text-[10px] text-slate-400 mt-1 text-center">Ảnh lưu trên máy này, không đồng bộ cloud</p>' : '') +
+      '</div>';
+    body.innerHTML = photoHtml +
+      '<div class="text-center font-bold text-base text-slate-800 mb-3">' + (st ? st.name : '') + '</div>' +
+      fieldRow('Họ và tên', 'nameDisplay', st ? st.name : '', false) +
+      fieldRow('Giới tính', 'gender', p.gender, edit) +
+      fieldRow('Ngày tháng năm sinh', 'dob', p.dob, edit) +
+      fieldRow('Chỗ ở hiện tại', 'address', p.address, edit) +
+      fieldRow('Nơi sinh', 'birthPlace', p.birthPlace, edit) +
+      fieldRow('Quê quán', 'hometown', p.hometown, edit) +
+      fieldRow('Số căn cước công dân', 'cccd', p.cccd, edit) +
+      fieldRow('Ngày cấp căn cước', 'cccdDate', p.cccdDate, edit) +
+      fieldRow('Dân tộc', 'ethnicity', p.ethnicity, edit) +
+      fieldRow('Tôn giáo', 'religion', p.religion, edit) +
+      fieldRow('Hoàn cảnh', 'circumstance', p.circumstance, edit) +
+      fieldRow('Tên cha', 'fatherName', p.fatherName, edit) +
+      fieldRow('Số điện thoại cha', 'fatherPhone', p.fatherPhone, edit) +
+      fieldRow('Tên mẹ', 'motherName', p.motherName, edit) +
+      fieldRow('Số điện thoại mẹ', 'motherPhone', p.motherPhone, edit) +
+      fieldRow('Điện thoại liên hệ', 'phone', p.phone, edit);
+  } else {
+    const h = p.health || {};
+    const eyeOpts = ['Không', 'Cận thị', 'Loạn thị', 'Viễn thị', 'Bệnh lác', 'Bệnh về mắt khác'];
+    const eyeVal = h.eye || 'Không';
+    let eyeHtml;
+    if (edit) {
+      eyeHtml = '<div class="mb-2.5"><label class="block text-[11px] font-bold text-slate-500 mb-0.5">Bệnh về mắt</label>' +
+        '<select data-si="h_eye" class="w-full p-2 border rounded-lg text-sm bg-white">' +
+        eyeOpts.map(o => '<option value="' + o + '"' + (o === eyeVal ? ' selected' : '') + '>' + o + '</option>').join('') +
+        '</select></div>';
+    } else {
+      eyeHtml = fieldRow('Bệnh về mắt', 'h_eye', eyeVal, false);
+    }
+    body.innerHTML = '<div class="text-center font-bold text-sm text-slate-700 mb-3">' + (st ? st.name : '') + ' — Sức khỏe</div>' +
+      fieldRow('Chiều cao (cm)', 'h_height', h.height, edit) +
+      fieldRow('Cân nặng (kg)', 'h_weight', h.weight, edit) +
+      eyeHtml +
+      fieldRow('Nhóm máu', 'h_bloodType', h.bloodType, edit) +
+      fieldRow('Dị ứng', 'h_allergy', h.allergy, edit) +
+      fieldRow('Bệnh mãn tính / lưu ý y tế', 'h_chronic', h.chronic, edit) +
+      (edit
+        ? '<div class="mb-2.5"><label class="block text-[11px] font-bold text-slate-500 mb-0.5">Ghi chú sức khỏe</label><textarea data-si="h_notes" rows="3" class="w-full p-2 border rounded-lg text-sm">' + (h.notes || '') + '</textarea></div>'
+        : fieldRow('Ghi chú sức khỏe', 'h_notes', h.notes, false));
+  }
+}
+function onStudentPhotoSelected(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  // Cho phép ảnh chất lượng cao; hệ thống tự nén về khoảng 200KB
+  if (file.size > 15 * 1024 * 1024) {
+    alert('Ảnh quá lớn (trên 15MB). Vui lòng chọn ảnh khác.');
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      const maxSide = 800;
+      let w = img.width, h = img.height;
+      if (w > maxSide || h > maxSide) {
+        if (w > h) { h = Math.round(h * maxSide / w); w = maxSide; }
+        else { w = Math.round(w * maxSide / h); h = maxSide; }
+      }
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = w; canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+      const targetBytes = 200 * 1024;
+      const approxSize = (s) => Math.round((s.length - (s.indexOf(',') + 1)) * 0.75);
+      let quality = 0.85;
+      let data = canvas.toDataURL('image/jpeg', quality);
+      let size = approxSize(data);
+      let guard = 0;
+      while (size > targetBytes && quality > 0.35 && guard < 12) {
+        quality -= 0.08;
+        data = canvas.toDataURL('image/jpeg', quality);
+        size = approxSize(data);
+        guard++;
+      }
+      while (size > targetBytes && (w > 320 || h > 320) && guard < 20) {
+        w = Math.round(w * 0.85);
+        h = Math.round(h * 0.85);
+        canvas.width = w; canvas.height = h;
+        ctx.drawImage(img, 0, 0, w, h);
+        data = canvas.toDataURL('image/jpeg', Math.max(quality, 0.4));
+        size = approxSize(data);
+        guard++;
+      }
+      getProfile(siCurrentId).photo = data;
+      renderStudentInfoBody();
+      const kb = Math.round(size / 1024);
+      if (kb > 250) {
+        alert('Đã nén ảnh còn khoảng ' + kb + 'KB (hơi lớn hơn 200KB do ảnh gốc rất chi tiết).');
+      }
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+async function saveStudentInfo() {
+  if (!canEditStudentInfo(siCurrentId)) return;
+  const p = getProfile(siCurrentId);
+  document.querySelectorAll('[data-si]').forEach(el => {
+    const k = el.getAttribute('data-si');
+    const v = el.value.trim();
+    if (k.startsWith('h_')) {
+      p.health[k.slice(2)] = v;
+    } else if (k !== 'nameDisplay') {
+      p[k] = v;
+    }
+  });
+  const st = students.find(s => s.id === siCurrentId);
+  logActivity('Cập nhật thông tin học sinh', st ? st.name : siCurrentId);
+  await saveStorage(true);
+  siEditMode = false;
+  renderStudentInfoBody();
+  alert('Đã lưu thông tin học sinh!');
+}
+
+function csvEscape(v) {
+  const s = String(v == null ? '' : v);
+  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function downloadCsv(filename, headers, rows) {
+  const lines = [headers.map(csvEscape).join(',')];
+  rows.forEach(r => lines.push(r.map(csvEscape).join(',')));
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function exportCurrentSiTab() {
+  if (siActiveTab === 'health') exportHealthExcel();
+  else exportProfileExcel();
+}
+function exportProfileExcel() {
+  const isGvcn = currentUser?.type === 'officer' && currentUser.officer.role === 'gvcn';
+  const list = isGvcn ? students : students.filter(s => currentUser?.type === 'ph' && s.id === currentUser.student.id);
+  const headers = ['STT', 'Họ và tên', 'Tổ', 'Giới tính', 'Ngày sinh', 'Chỗ ở hiện tại', 'Nơi sinh', 'Quê quán', 'Số căn cước công dân', 'Ngày cấp căn cước', 'Dân tộc', 'Tôn giáo', 'Hoàn cảnh', 'Tên cha', 'Số điện thoại cha', 'Tên mẹ', 'Số điện thoại mẹ', 'Điện thoại liên hệ'];
+  const rows = list.map((st, i) => {
+    const p = getProfile(st.id);
+    return [i + 1, st.name, st.group, p.gender, p.dob, p.address, p.birthPlace, p.hometown, p.cccd, p.cccdDate, p.ethnicity, p.religion, p.circumstance, p.fatherName, p.fatherPhone, p.motherName, p.motherPhone, p.phone];
+  });
+  const name = isGvcn ? 'Ly_lich_hoc_sinh_lop_7A1.csv' : 'Ly_lich_' + (list[0]?.name || 'hoc_sinh').replace(/\s+/g, '_') + '.csv';
+  downloadCsv(name, headers, rows);
+  logActivity('Xuất Excel lí lịch học sinh', isGvcn ? 'Cả lớp' : (list[0]?.name || ''));
+}
+function exportHealthExcel() {
+  const isGvcn = currentUser?.type === 'officer' && currentUser.officer.role === 'gvcn';
+  const list = isGvcn ? students : students.filter(s => currentUser?.type === 'ph' && s.id === currentUser.student.id);
+  const headers = ['STT', 'Họ và tên', 'Tổ', 'Chiều cao (cm)', 'Cân nặng (kg)', 'Bệnh về mắt', 'Nhóm máu', 'Dị ứng', 'Bệnh mãn tính / lưu ý y tế', 'Ghi chú sức khỏe'];
+  const rows = list.map((st, i) => {
+    const h = getProfile(st.id).health || {};
+    return [i + 1, st.name, st.group, h.height || '', h.weight || '', h.eye || 'Không', h.bloodType || '', h.allergy || '', h.chronic || '', h.notes || ''];
+  });
+  const name = isGvcn ? 'Suc_khoe_hoc_sinh_lop_7A1.csv' : 'Suc_khoe_' + (list[0]?.name || 'hoc_sinh').replace(/\s+/g, '_') + '.csv';
+  downloadCsv(name, headers, rows);
+  logActivity('Xuất Excel sức khỏe học sinh', isGvcn ? 'Cả lớp' : (list[0]?.name || ''));
+}
 
 </script>
 
