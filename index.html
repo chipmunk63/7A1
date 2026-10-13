@@ -508,7 +508,12 @@
           <button type="submit" class="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow transition">
             <i class="fa-solid fa-shield-halved mr-1.5"></i> Đăng nhập
           </button>
-          <p class="text-center text-xs text-slate-400 pt-1">Dành cho ban cán sự lớp và GVCN</p>
+          <p class="text-center pt-1">
+            <button type="button" onclick="openGvcnForgotModal()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline">
+              <i class="fa-solid fa-key mr-1"></i> Quên mật khẩu giáo viên chủ nhiệm?
+            </button>
+          </p>
+          <p class="text-center text-xs text-slate-400">Dành cho ban cán sự lớp và giáo viên chủ nhiệm</p>
         </form>
       </div>
     </div>
@@ -1033,6 +1038,19 @@
           <p class="text-xs text-indigo-200 mt-0.5">Quản lý học sinh, mật khẩu cán bộ, phụ huynh và quy tắc điểm thi đua</p>
         </div>
         <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+          <h4 class="font-bold text-xs uppercase text-slate-700 flex items-center gap-1.5 border-b pb-2"><i class="fa-solid fa-shield-halved text-amber-600"></i> Mã khôi phục mật khẩu giáo viên chủ nhiệm</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">Khi quên mật khẩu đăng nhập, dùng mã này trên màn hình đăng nhập (nút <b>Quên mật khẩu giáo viên chủ nhiệm</b>) để đặt mật khẩu mới. Hãy ghi lại và giữ riêng, không chia sẻ phụ huynh.</p>
+          <div class="flex flex-wrap items-end gap-2">
+            <div class="flex-1 min-w-[12rem]">
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Mã khôi phục hiện tại</label>
+              <input type="password" id="gvcnRecoveryInput" placeholder="Nhập mã mới (tối thiểu 6 ký tự)" class="w-full p-2.5 border rounded-xl text-sm font-mono">
+            </div>
+            <button type="button" onclick="toggleRecoveryVisibility()" class="px-3 py-2.5 border rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50" title="Hiện/ẩn"><i class="fa-solid fa-eye" id="iconRecoveryEye"></i></button>
+            <button type="button" onclick="saveGvcnRecoveryCode()" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow">Lưu mã khôi phục</button>
+          </div>
+          <p id="gvcnRecoveryStatus" class="text-[11px] font-semibold text-slate-500"></p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
           <h4 class="font-bold text-xs uppercase text-slate-700 flex items-center gap-1.5 border-b pb-2"><i class="fa-solid fa-cloud text-indigo-600"></i> Cấu Hình Đồng Bộ Realtime (Firebase)</h4>
           <div class="flex flex-wrap items-center gap-2">
             <input type="text" id="firebaseUrlInput" placeholder="Nhập URL Realtime Database..." class="flex-1 p-2 border rounded-xl text-xs font-mono">
@@ -1270,6 +1288,36 @@
         <button type="button" id="btnSiEdit" onclick="toggleSiEdit()" class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold hidden">Sửa</button>
         <button type="button" id="btnSiSave" onclick="saveStudentInfo()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold hidden">Lưu</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Quên mật khẩu GVCN -->
+  <div id="gvcnForgotModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-unlock-keyhole text-amber-500 mr-1.5"></i> Khôi phục mật khẩu GVCN</h3>
+        <button type="button" onclick="closeGvcnForgotModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 leading-relaxed">Nhập <b>mã khôi phục</b> đã lưu trong mục Cấu hình (khi còn đăng nhập được), rồi đặt mật khẩu mới cho giáo viên chủ nhiệm.</p>
+      <form onsubmit="submitGvcnForgot(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Mã khôi phục</label>
+          <input type="password" id="forgotRecoveryCode" required placeholder="Mã khôi phục" class="w-full p-2.5 border rounded-xl text-sm font-mono">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Mật khẩu mới</label>
+          <input type="password" id="forgotNewPin" required minlength="4" placeholder="Tối thiểu 4 ký tự" class="w-full p-2.5 border rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nhập lại mật khẩu mới</label>
+          <input type="password" id="forgotNewPin2" required minlength="4" placeholder="Nhập lại" class="w-full p-2.5 border rounded-xl text-sm">
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button type="button" onclick="closeGvcnForgotModal()" class="px-3 py-2 border rounded-xl text-xs font-semibold">Hủy</button>
+          <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl">Đặt lại mật khẩu</button>
+        </div>
+      </form>
+      <p class="text-[11px] text-slate-400 border-t pt-2">Chưa từng đặt mã khôi phục? Cần máy còn phiên đăng nhập GVCN để vào <b>Cấu hình</b> đặt mã, hoặc khôi phục từ file sao lưu JSON.</p>
     </div>
   </div>
 
@@ -1645,6 +1693,7 @@ let baobaiList = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'baobai')) || 
 let taiLieuList = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'tailieu')) || [];
 let messages = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'messages')) || [];
 let activityLog = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'activityLog')) || [];
+let gvcnRecoveryCode = localStorage.getItem(STORAGE_PREFIX + 'gvcnRecovery') || '';
 // Module mới
 let attendance = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'attendance')) || []; // {id,date,session,studentId,status,week,by}
 let leaveRequests = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'leaves')) || []; // {id,studentId,date,session,reason,status,reply,createdAt}
@@ -1832,6 +1881,7 @@ function initFirebase() {
           }
         });
       }
+      if (typeof d.gvcnRecoveryCode === 'string') gvcnRecoveryCode = d.gvcnRecoveryCode;
       cleanOldLogs();
       saveStorage(false);
       refreshAllViews();
@@ -1869,6 +1919,7 @@ async function saveStorage(syncToCloud = true) {
   localStorage.setItem(STORAGE_PREFIX + 'teachers', JSON.stringify(subjectTeachers));
   localStorage.setItem(STORAGE_PREFIX + 'committee', JSON.stringify(classCommittee));
   localStorage.setItem(STORAGE_PREFIX + 'profiles', JSON.stringify(studentProfiles));
+  localStorage.setItem(STORAGE_PREFIX + 'gvcnRecovery', gvcnRecoveryCode || '');
   if (syncToCloud && firebaseDb) {
     try {
       // Ảnh học sinh lưu local; đồng bộ cloud không gửi photo để tránh quá dung lượng
@@ -1881,7 +1932,7 @@ async function saveStorage(syncToCloud = true) {
       await firebaseDb.ref(FB_DATA_KEY).set({
         students, officers, rules, scores, baobaiList, taiLieuList, tkbData, messages, activityLog, seatingMap,
         attendance, leaveRequests, announcements, grades, studentNotes, schoolEvents, baobaiDone, schoolStartISO,
-        subjectTeachers, classCommittee, studentProfiles: profilesCloud,
+        subjectTeachers, classCommittee, studentProfiles: profilesCloud, gvcnRecoveryCode,
         updatedAt: Date.now()
       });
     } catch (err) { console.warn("Firebase write error:", err); }
@@ -1952,6 +2003,7 @@ function forceSyncWithCloud() {
         }
       });
     }
+    if (typeof d.gvcnRecoveryCode === 'string') gvcnRecoveryCode = d.gvcnRecoveryCode;
     cleanOldLogs();
     saveStorage(false);
     refreshAllViews();
@@ -2995,6 +3047,76 @@ async function deleteTailieu(id) {
   renderTailieuList();
 }
 
+// ===== QUÊN MẬT KHẨU GVCN =====
+function openGvcnForgotModal() {
+  document.getElementById('forgotRecoveryCode').value = '';
+  document.getElementById('forgotNewPin').value = '';
+  document.getElementById('forgotNewPin2').value = '';
+  document.getElementById('gvcnForgotModal').classList.remove('hidden');
+}
+function closeGvcnForgotModal() {
+  document.getElementById('gvcnForgotModal').classList.add('hidden');
+}
+function toggleRecoveryVisibility() {
+  const inp = document.getElementById('gvcnRecoveryInput');
+  const icon = document.getElementById('iconRecoveryEye');
+  if (!inp) return;
+  if (inp.type === 'password') { inp.type = 'text'; if (icon) icon.className = 'fa-solid fa-eye-slash'; }
+  else { inp.type = 'password'; if (icon) icon.className = 'fa-solid fa-eye'; }
+}
+async function saveGvcnRecoveryCode() {
+  if (!currentUser || currentUser.type !== 'officer' || currentUser.officer.role !== 'gvcn') {
+    return alert('Chỉ giáo viên chủ nhiệm mới được đặt mã khôi phục.');
+  }
+  const v = (document.getElementById('gvcnRecoveryInput')?.value || '').trim();
+  if (v.length < 6) return alert('Mã khôi phục cần tối thiểu 6 ký tự.');
+  if (v === (officers.gvcn && officers.gvcn.pin)) return alert('Mã khôi phục không được trùng mật khẩu đăng nhập.');
+  gvcnRecoveryCode = v;
+  logActivity('Đặt mã khôi phục GVCN', 'Đã cập nhật');
+  await saveStorage(true);
+  document.getElementById('gvcnRecoveryInput').value = '';
+  renderGvcnConfig();
+  alert('Đã lưu mã khôi phục. Hãy ghi lại và cất riêng (không chia sẻ phụ huynh).');
+}
+async function submitGvcnForgot(e) {
+  e.preventDefault();
+  const code = document.getElementById('forgotRecoveryCode').value.trim();
+  const p1 = document.getElementById('forgotNewPin').value.trim();
+  const p2 = document.getElementById('forgotNewPin2').value.trim();
+  if (!gvcnRecoveryCode) {
+    return alert('Chưa có mã khôi phục trên hệ thống.\n\nCách xử lý:\n1) Dùng máy từng đăng nhập GVCN → Cấu hình → đặt mã khôi phục, hoặc\n2) Khôi phục từ file sao lưu JSON, hoặc\n3) Sửa mật khẩu officers.gvcn trong Firebase / file backup.');
+  }
+  if (code !== gvcnRecoveryCode) return alert('Mã khôi phục không đúng.');
+  if (p1.length < 4) return alert('Mật khẩu mới tối thiểu 4 ký tự.');
+  if (p1 !== p2) return alert('Hai lần nhập mật khẩu mới không khớp.');
+  if (p1 === gvcnRecoveryCode) return alert('Mật khẩu đăng nhập không được trùng mã khôi phục.');
+  if (!officers.gvcn) return alert('Không tìm thấy tài khoản giáo viên chủ nhiệm.');
+  officers.gvcn.pin = p1;
+  // Ghi local ngay cả khi chưa login
+  localStorage.setItem(STORAGE_PREFIX + 'officers', JSON.stringify(officers));
+  try {
+    if (firebaseDb) {
+      await firebaseDb.ref(FB_DATA_KEY + '/officers/gvcn/pin').set(p1);
+    }
+  } catch (err) { console.warn(err); }
+  try {
+    activityLog.unshift({
+      id: Date.now(),
+      action: 'Khôi phục mật khẩu GVCN',
+      detail: 'Đặt lại bằng mã khôi phục',
+      by: 'Hệ thống (quên MK)',
+      ts: Date.now()
+    });
+    localStorage.setItem(STORAGE_PREFIX + 'activityLog', JSON.stringify(activityLog));
+  } catch (err) {}
+  closeGvcnForgotModal();
+  alert('Đã đặt lại mật khẩu giáo viên chủ nhiệm.\nHãy đăng nhập bằng mật khẩu mới.');
+  const roleSel = document.getElementById('loginCbRole');
+  if (roleSel) roleSel.value = 'gvcn';
+  document.getElementById('formCanbo')?.classList.remove('hidden');
+  document.getElementById('formPhuhuynh')?.classList.add('hidden');
+}
+
 // ===== ĐỔI MẬT KHẨU =====
 let forceChangePin = false;
 const DEFAULT_PINS = { student: '7a12026', gvcn: '0207', loptruong: '7101', loppho_ht: '7102', loppho_ld: '7103', totruong1: '7111', totruong2: '7112', totruong3: '7113', totruong4: '7114' };
@@ -3062,6 +3184,13 @@ async function submitChangePin(e) {
 // ===== CẤU HÌNH GVCN =====
 function renderGvcnConfig() {
   document.getElementById('totalStudentsCount').textContent = students.length;
+  const stRec = document.getElementById('gvcnRecoveryStatus');
+  if (stRec) {
+    stRec.textContent = gvcnRecoveryCode
+      ? 'Đã có mã khôi phục (đã lưu). Nên ghi ra giấy và cất riêng.'
+      : 'Chưa đặt mã khôi phục — hãy đặt ngay để tránh mất quyền khi quên mật khẩu.';
+    stRec.className = 'text-[11px] font-semibold ' + (gvcnRecoveryCode ? 'text-emerald-600' : 'text-amber-700');
+  }
   const pinTable = document.getElementById('studentPinManageTable');
   pinTable.innerHTML = students.map((st, idx) => `
     <tr class="hover:bg-slate-50">
@@ -3244,7 +3373,7 @@ async function removeRule(type, idx) {
 }
 
 function exportDataJson() {
-  const backup = { students, officers, rules, scores, baobaiList, taiLieuList, tkbData, messages, activityLog, seatingMap, attendance, leaveRequests, announcements, grades, studentNotes, schoolEvents, baobaiDone, schoolStartISO, date: new Date().toISOString() };
+  const backup = { students, officers, rules, scores, baobaiList, taiLieuList, tkbData, messages, activityLog, seatingMap, attendance, leaveRequests, announcements, grades, studentNotes, schoolEvents, baobaiDone, schoolStartISO, gvcnRecoveryCode, date: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
